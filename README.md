@@ -1,10 +1,13 @@
-# salvador
+# salvador <img src="doc/img/salvador-logo.jpg" width="70px">
 
-> "Have no fear of perfection - you'll never reach it." — Salvador Dalí
+> _"Have no fear of perfection - you'll never reach it."<br/>
+> -- Salvador Dalí_
 
 **salvador** is an autonomous visualization agent for [Claude Code](https://code.claude.com/docs/en/overview).
 
-It is not just about "writing code" but about sharing a **vision**. it implements a p5.js sketch, inspects it with a headless browser, critiques the aesthetics and UX, and iteratively refines the result until it matches the design principles.
+from thinking about the Universe to _looking_ at the Universe.
+
+it starts from a p5.js sketch, inspects it with a headless browser, critiques the aesthetics and UX, and iteratively refines the result until it matches the design principles.
 
 ## usage
 
