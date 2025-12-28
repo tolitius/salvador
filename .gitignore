@@ -1,0 +1,122 @@
+target/
+logs/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+local-resources/
+.env*
+Makefile.local
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+/.lein-*
+/.nrepl-port
+/.idea
+/.lein-repl-history
+/.nrepl-history
+hs_*.log
+pom.xml
+
+### node, yar, typescript
+.DS_STORE
+node_modules
+*~
+*.pyc
+.grunt
+_SpecRunner.html
+__benchmarks__
+remote-repo/
+coverage/
+.module-cache
+fixtures/dom/public/react-dom.js
+fixtures/dom/public/react.js
+test/the-files-to-test.generated.js
+*.log*
+chrome-user-data
+*.sublime-project
+*.sublime-workspace
+.vscode
+*.swp
+*.swo
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# React
+packages/react-devtools-core/dist
+packages/react-devtools-extensions/chrome/build
+packages/react-devtools-extensions/chrome/*.crx
+packages/react-devtools-extensions/chrome/*.pem
+packages/react-devtools-extensions/firefox/build
+packages/react-devtools-extensions/firefox/*.xpi
+packages/react-devtools-extensions/firefox/*.pem
+packages/react-devtools-extensions/shared/build
+packages/react-devtools-inline/dist
+packages/react-devtools-shell/dist
+
+src/react-app-env.d.ts
+.rebel*
+
+.shadow-cljs
+.preloads-local.edn
+resources/public/js/compiled/
+.calva
+.clj-kondo
+.lsp
+.yalc
+yalc.lock
+
+/checkouts/
+.cpcache/
+.portal
+
+# Process Compose
+process-compose.override.yml
+
+# CSS Scraper output
+dev/css-scraper/output/
