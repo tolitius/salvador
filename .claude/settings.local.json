@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Skill(salvador)"
+      "Skill(salvador)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:beta.p5js.org)"
     ]
   }
 }
