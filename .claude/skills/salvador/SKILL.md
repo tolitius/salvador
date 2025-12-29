@@ -4,7 +4,7 @@ description: Autonomous p5.js visualization agent. It implements, inspects, crit
 ---
 
 # Salvador Agent
-Use this skill to visualize concepts using p5.js with a focus on **high-quality UX and aesthetics**.
+Use this skill to visualize concepts using p5.js with a focus on **high-quality UX, aesthetics, and continuous motion**.
 
 ## Workflow
 Follow this **strict loop** when asked to visualize a concept:
@@ -16,7 +16,7 @@ Follow this **strict loop** when asked to visualize a concept:
 ### Phase 1.5: Concept Analysis (Before Coding!)
 
 This visualization needs to teach and reflect the concept that I was asked to visualize.
-Therefore, make sure to include details so the user (who can be a child, adult, expert, or novice) can understand the concept well.)
+Therefore, make sure to include details so the user (who can be a child, adult, expert, or novice) can understand the concept well.
 
 Before writing any code, decompose the concept:
 
@@ -30,14 +30,23 @@ Before writing any code, decompose the concept:
    - What is the "final" state?
    - Aim for 3-5 stages that build understanding
 
-3. **Identify What Needs Explanation**: What text/labels/diagrams would help?
+3. **Identify Dynamic Elements**: What moves in this system?
+   - Do NOT make a visualization of a static snapshot, everything moves in the Universe
+   - Even if the concept has "stages," the actors must be alive (e.g., electrons orbiting, atoms vibrating, lists scanning).
+   - be DETAILED. for example if certain electrons will be bonding, find out which ones (e.g., certain valence electrons) and highlight them visually. this of course does not just apply to Chemistry, but to any domain (e.g., in sorting algorithms, show which elements are being compared/swapped at each step)
+
+4. **Identify What Needs Explanation**: What text/labels/diagrams would help?
    - Key terms to define
    - Quantities to show
    - Relationships to highlight
 
 ### Phase 1.6: Stage Design Principles
 
-4. **Granular Transitions**: Never skip the "moment of change"
+5. **Living Systems**: The system must breathe.
+   - **Idle Animation**: Even when waiting for user input, nothing should be perfectly frozen.
+   - **Continuous Time**: Use `draw()` to animate physics/logic continuously. `noLoop()` is forbidden.
+
+6. **Granular Transitions**: Never skip the "moment of change"
    - BAD: "state A" → "state B" (viewer misses the transformation)
    - GOOD: "state A" → "approaching change" → "moment of change" → "state B"
    - Rule: if two stages feel like a big jump, add an intermediate stage
@@ -46,16 +55,17 @@ Before writing any code, decompose the concept:
      * Chemical bond: show atoms approaching before showing them bonded
      * Mathematical proof: show each logical step, not just premise → conclusion
 
-5. **Trackability**: When elements transform or move, viewers must follow them
+7. **Trackability**: When elements transform or move, viewers must follow them
    - Assign distinct colors to individual components at the start
    - Maintain those colors through all stages
+   - Link details, configurations, numbers, strings, etc.. visually to their representations
    - Make it obvious which element went where, became what, or combined with whom
    - Examples:
      * In a merge sort: color the two halves differently so viewer tracks them through merges
      * In a state machine: color each state and show transitions with matching colors
      * In molecular bonding: color each atom's electrons to show which ones get shared
 
-6. **Data Cards**: Show the underlying facts, not just the visual
+8. **Data Cards**: Show the underlying facts, not just the visual
    - Include domain notation (formulas, equations, configurations, pseudocode)
    - Display quantities, measurements, and labels using proper terminology
    - Cards can appear/disappear based on stage relevance
@@ -73,7 +83,8 @@ Repeat this cycle until the visualization is **High Quality**:
     * *Constraint*: For conceptual visualizations, use **progressive revelation**:
       - Build an interactive stepper (← →) through stages
       - Show info panels/cards explaining each stage
-      - Animate transitions between states
+      - **Critical**: Animate transitions between states (slide/flow/morph)
+    * *Constraint*: **Continuous Motion**: Ensure `draw()` runs continuously. Even in a "Step 1" static state, show micro-movements (vibration, orbit, pulse).
     * *Constraint*: Include **educational elements**:
       - Labels for key components
       - Brief text descriptions of what's happening
@@ -82,20 +93,23 @@ Repeat this cycle until the visualization is **High Quality**:
     * *Constraint*: Ensure text is readable and has high contrast.
     * *Constraint*: Support interactions (mouse drag, click, or keyboard shortcuts).
     * *Constraint*: **Canvas sizing**: Use 850x540 or smaller to fit without scrolling
-    * *Constraint*: **Keyboard handling**: Use `window.addEventListener('keydown')` for arrow keys, NOT p5's `keyPressed` (which requires canvas focus)
-    * *Constraint*: **Track elements visually**: Color-code components that transform and maintain those colors throughout all stages
-2.  **Inspect**: Run `node inspect.js`.
+    * *Constraint*: **Keyboard handling**: Use `window.addEventListener('keydown')` for arrow keys (and map 'G' to `saveGif`).
+    * *Constraint*: **Track elements visually**: Color-code components that transform and maintain those colors throughout all stages.
+2.  **Inspect**: Run `node inspect.js`
 3.  **Critique**:
     * **Logs**: Are there errors?
     * **Visuals**: Open `snapshot.png` and strictly evaluate:
+        * **Life Check**: Is it moving? (Reject if it looks like a static slide).
         * **Composition**: Is the content centered? Is it cut off?
         * **Legibility**: Is there text overlap? Is the font size appropriate?
         * **Aesthetics**: Does it look "engineered" or "designed"? (Aim for designed).
         * **UX**: Did I implement user controls (e.g., "Press 'R' to reset")?
 4.  **Decide**:
     * *Errors?* -> Fix code -> **Repeat**.
-    * *Ugly/Basic?* (e.g., overlapping text, boring colors, no interaction) -> **Refine Design** -> **Repeat**.
-    * *Amazing?* -> **Proceed to Phase 3**.
+    * *Static/Boring?* -> **Add Micro-Movement (vibration, orbits)** -> **Repeat**.
+    * *Physics/Logic Broken?* (e.g. Gravity creates energy, sorting fails) -> **Fix Simulation Logic** -> **Repeat**.
+    * *Missing Educational Context?* -> **Add Labels/Data Cards** -> **Repeat**.
+    * *Amazing, Dynamic & Physically Accurate?* -> **Proceed to Phase 3**.
 
 ### Phase 3: Presentation (The "Reveal")
 Once the loop is complete and the visualization is polished:

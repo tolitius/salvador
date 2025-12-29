@@ -1,67 +1,25 @@
 # salvador <img src="doc/img/salvador-logo.jpg" width="70px">
 
-> _"Have no fear of perfection - you'll never reach it."<br/>
+> _"Have no fear of perfection - you'll never reach it"<br/>
 > -- Salvador Dalí_
 
-**salvador** is an autonomous visualization agent for [Claude Code](https://code.claude.com/docs/en/overview).
+**salvador** is an autonomous visualization agent for [Claude Code](https://code.claude.com/docs/en/overview)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+it lays down the path from thinking about the Universe to _looking_ at the Universe
 
-from thinking about the Universe to _looking_ at the Universe.
+* starts from a sketch
+* inspects it with a headless browser
+* critiques the aesthetics and UX
+* and iteratively refines the result until the laws of physics hold and the visual matches the design principles
 
-it starts from a p5.js sketch, inspects it with a headless browser, critiques the aesthetics and UX, and iteratively refines the result until it matches the design principles.
+## how to play
 
-## usage
-
-Once `salvador` is in your `.claude/skills` path, start `claude` and visualize:
-
-```bash
-/visualize a double pendulum with chaotic motion trails
-```
-
-Or explain a concept:
-
-```bash
-/visualize the difference between bubble sort and quick sort
-```
-
-Salvador will enter an autonomous loop: `coding` -> `inspecting` -> `refining`.
-When it is satisfied with the quality, it will launch the result in your browser.
-
-## how it works
-
-Salvador operates on a strict **Implement → Inspect → Refine** feedback loop.
-
-### 1. the eyes (inspector)
-
-Salvador validates its work visually. It spins up a [Vite](https://vitejs.dev/) server and uses [Playwright](https://playwright.dev/) to:
-
-* Capture console errors (e.g., `p.setup is not a function`).
-* Take a snapshot (`snapshot.png`) of the canvas.
-* Verify that the visualization is not blank, off-center, or visually broken.
-
-### 2. the brain (SKILL.md)
-
-The agent is governed by a set of strict constraints defined in `SKILL.md`:
-
-* **Granular Transitions**: Don't skip the "moment of change".
-* **Trackability**: Color-code elements so viewers can follow them through transformations.
-* **Data Cards**: Show the underlying math/logic alongside the visual.
-* **Progressive Revelation**: Build understanding step-by-step.
-
-### 3. the hand (p5.js)
-
-It scaffolds a reactive environment using `p5.js` in instance mode, ensuring no global namespace pollution and full support for modern ES modules.
-
-## prerequisites
-
-* Node.js 18+
-* Claude Code
-
-## installation
+### install it
 
 clone the repository:
 
 ```bash
-git clone [https://github.com/tolitius/salvador.git](https://github.com/tolitius/salvador.git)
+git clone https://github.com/tolitius/salvador.git
 cd salvador
 ```
 
@@ -71,11 +29,28 @@ start the agent:
 claude
 ```
 
-*The agent automatically detects the `.claude` configuration and loads the skill.*
+*the Claude Code agent automatically detects the `.claude` configuration and loads the skill.*
+
+### play
+
+once `salvador` is in your `.claude/skills` path, start `claude` and visualize:
+
+```bash
+/visualize a double pendulum with chaotic motion trails
+```
+
+or explain a concept:
+
+```bash
+/visualize the difference between bubble sort and quick sort
+```
+
+**salvador** will enter an autonomous loop: `coding` -> `inspecting` -> `refining`<br/>
+when it is satisfied with the quality, it will launch the result in your browser
 
 ## structure
 
-The repository follows the **Agent Skills** architecture:
+The repository follows the [Agent Skills](https://github.com/anthropics/skills) architecture:
 
 ```text
 .
@@ -97,3 +72,4 @@ The repository follows the **Agent Skills** architecture:
 Copyright © 2025 tolitius
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
+
