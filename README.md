@@ -12,6 +12,9 @@ it lays down the path from thinking about the Universe to _looking_ at the Unive
 * critiques the aesthetics and UX
 * and iteratively refines the result until the laws of physics hold and the visual matches the design principles
 
+>  _$ /visualize schrödinger's cat_<br/>
+>  <img src="doc/img/schrödingers-cat.gif" controls width="400"/>
+
 ## how to play
 
 ### install it
@@ -36,21 +39,33 @@ claude
 once `salvador` is in your `.claude/skills` path, start `claude` and visualize:
 
 ```bash
-/visualize a double pendulum with chaotic motion trails
+/visualize covalent bond H2O
 ```
+
+<img src="doc/img/h2o.gif" controls width="400"/>
+
+or visualize the near cosmic forces:
+
+```bash
+/visualize the difference between throwing a basketball on Earth vs. on the Moon
+```
+
+<img src="doc/img/earth-vs-moon.gif" controls width="400"/>
 
 or explain a concept:
 
 ```bash
-/visualize the difference between bubble sort and quick sort
+/visualize the difference between a centralized network and a distributed mesh network
 ```
+
+<img src="doc/img/central-vs-mesh.gif" controls width="400"/>
 
 **salvador** will enter an autonomous loop: `coding` -> `inspecting` -> `refining`<br/>
 when it is satisfied with the quality, it will launch the result in your browser
 
 ## structure
 
-The repository follows the [Agent Skills](https://github.com/anthropics/skills) architecture:
+the skill organization follows the proposed [agent skills](https://github.com/anthropics/skills) convention:
 
 ```text
 .
@@ -69,7 +84,6 @@ The repository follows the [Agent Skills](https://github.com/anthropics/skills) 
 
 ## license
 
-Copyright © 2025 tolitius
+Copyright © 2026 tolitius
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
-
