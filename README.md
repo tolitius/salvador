@@ -65,7 +65,7 @@ when it is satisfied with the quality, it will launch the result in your browser
 
 ## structure
 
-the skill organization follows the proposed [agent skills](https://github.com/anthropics/skills) convention:
+the skill organization follows the proposed [agent skills](https://agentskills.io/what-are-skills) convention:
 
 ```text
 .
