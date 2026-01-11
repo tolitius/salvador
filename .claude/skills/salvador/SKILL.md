@@ -99,10 +99,11 @@ Repeat this cycle until the visualization is **High Quality**:
 2.  **Inspect**: Run `node inspect.js`
 3.  **Critique**:
     * **Logs**: Are there errors?
-    * **Visuals**: Open `snapshot.png` and strictly evaluate:
-        * **Life Check**: Is it moving? (Reject if it looks like a static slide).
-        * **Composition**: Is the content centered? Is it cut off?
-        * **Legibility**: Is there text overlap? Is the font size appropriate?
+    * **Visual Audit**: Open *all* generated snapshots (e.g., `stage_1.png`, `stage_2.png` ... `final.png`) and strictly evaluate the sequence:
+        * **Completeness**: Do not evaluate just the final frame. Check the evolution. Did the visualization break or glitch in the middle?
+        * **Life Check**: Is it moving/evolving? (Reject if the sequence looks like a static slide).
+        * **Composition**: Is the content centered? Is it cut off in *any* frame?
+        * **Legibility**: Is there text overlap? Is the font size appropriate throughout?
         * **Aesthetics**: Does it look "engineered" or "designed"? (Aim for designed).
         * **UX**: Did I implement user controls (e.g., "Press 'R' to reset")?
 4.  **Decide**:
