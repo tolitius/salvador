@@ -13,6 +13,7 @@ Follow this **strict loop** when asked to visualize a concept:
 1.  **Check Context**: If `package.json` is missing, run `bash .claude/skills/salvador/scripts/setup.sh`.
 2.  **Scaffold**: Ensure `index.html` and `src/main.js` exist.
 3.  **Read p5.js Reference**: Read `resources/p5-missing-knowledge.md` for p5.js 2.x API changes before writing any code.
+4.  **Read Responsive Design**: Read `resources/responsive-design.md` for the scale factor pattern.
 
 ### Phase 1.5: Concept Analysis (Before Coding!)
 
