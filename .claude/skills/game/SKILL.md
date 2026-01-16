@@ -15,8 +15,10 @@ Follow this **strict loop** when asked to create a game:
 3. **Read API Reference**:
    - For 2D games: Read `references/kaplay-ref.md` for KAPLAY API.
    - For 3D games: Read `references/threejs-ref.md` for Three.js API.
+   - For FPS games: Read `references/fps-patterns.md` for pointer lock, hit detection, enemy AI.
 4. **Read Game Patterns**: Read `references/game-patterns.md` for architecture patterns.
-5. **Read Visual Assets**: Read `references/visual-assets.md` for procedural sprites, palettes, and visual effects.
+5. **Read Game Systems**: Read `references/game-systems.md` for difficulty scaling, scoring, persistence, and UI patterns.
+6. **Read Visual Assets**: Read `references/visual-assets.md` for procedural sprites, palettes, and visual effects.
 
 ### Phase 1.5: Game Design Analysis (Before Coding!)
 
@@ -234,9 +236,14 @@ Once the loop is complete and the game is polished:
 |-------------|-----------|----------|
 | 2D game (default) | KAPLAY.js | `templates/kaplay-2d.html` |
 | 3D game (explicit) | Three.js | `templates/threejs-3d.html` |
+| FPS / first-person shooter | Three.js | `templates/threejs-fps.html` |
 | Ultra-simple (quiz, flashcard) | Vanilla Canvas | `templates/canvas-minimal.html` |
 
-**Decision rule**: Use KAPLAY unless the user explicitly says "3D", "first-person", "third-person camera", or similar 3D indicators. KAPLAY handles most game types well.
+**Decision rule**:
+- Use KAPLAY for most 2D games (platformer, top-down, puzzle, etc.)
+- Use `threejs-fps.html` for first-person shooters, DOOM-likes, or any game requiring pointer lock + mouse look
+- Use `threejs-3d.html` for third-person 3D games, 3D puzzles, or non-shooter 3D experiences
+- FPS indicators: "first-person", "FPS", "shooter", "DOOM", "Wolfenstein", "gun", "pointer lock"
 
 ---
 
@@ -244,6 +251,8 @@ Once the loop is complete and the game is polished:
 - **KAPLAY API**: See `references/kaplay-ref.md` for component list and patterns
 - **Visual Assets**: See `references/visual-assets.md` for procedural sprites, color palettes, animations, and particle effects
 - **Three.js API**: See `references/threejs-ref.md` for 3D setup
+- **FPS Patterns**: See `references/fps-patterns.md` for pointer lock, hit detection, enemy AI, weapon rendering
+- **Game Systems**: See `references/game-systems.md` for difficulty scaling, scoring, persistence, UI patterns
 - **Game Patterns**: See `references/game-patterns.md` for architecture (state machines, ECS, proc-gen)
 - **Physics Constants**: See `references/physics-constants.md` for educational accuracy
 
@@ -279,6 +288,20 @@ Once the loop is complete and the game is polished:
 23. **No movement deformation**: Objects moving without squash/stretch/rotation feel stiff - add deformation on velocity changes
 24. **No impact particles**: Collisions and surface contacts without particles lack weight - add particles on all physical interactions
 25. **No floating text**: Score changes without visible "+N" text miss dopamine feedback - show value changes visually
+
+### FPS-Specific Pitfalls
+26. **Pointer lock not recovering**: After alt-tab or focus loss, pointer lock is lost. ALWAYS re-request on focus/click events.
+27. **Enemies shoot through walls**: Must check line of sight (step along ray) before allowing enemy attacks.
+28. **Enemies spawn in walls**: Validate spawn positions against collision map; use fallback positions if invalid.
+29. **3D hit detection for 2D gameplay**: Classic FPS uses 2D XZ-plane distance with cone-of-fire, ignoring Y axis.
+30. **Weapon drawn sideways**: FPS weapons should point forward (barrel vertical), not left-to-right like a side view.
+31. **No weapon feedback**: Always add recoil animation (move down/up) and muzzle flash on fire.
+32. **Static enemy sprites**: Animate walk (leg movement) and shoot (arms raised) states with canvas texture updates.
+33. **AI too aggressive**: Balance detection range, attack rate, and damage. First-time playability > difficulty.
+34. **Score counts down during play**: Live score should ONLY increase. Time bonuses calculated at end, only if mission succeeded.
+35. **Time bonus on failure**: Speed bonus should only be awarded when the player wins, not on death.
+36. **Floating point stat display**: Always use `Math.floor()` for health, armor, score display to avoid "99.7" health.
+37. **Modal UI not interactive**: Game over screen must have proper `pointer-events: auto` and exit pointer lock.
 
 ---
 

@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FPS Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #000; font-family: 'Courier New', monospace; }
+    canvas { display: block; }
+
+    /* HUD overlay */
+    #hud {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: #fff;
+      pointer-events: none;
+      z-index: 50;
+    }
+    .stat-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: #888;
+      font-size: 12px;
+      width: 60px;
+    }
+    .stat-bar-bg {
+      width: 120px;
+      height: 14px;
+      background: #300;
+      border: 2px solid #500;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      transition: width 0.2s, background 0.3s;
+    }
+    #health-bar { background: linear-gradient(to right, #0a0, #4f4); }
+    #armor-bar { background: linear-gradient(to right, #00a, #44f); }
+    .stat-value {
+      font-size: 14px;
+      font-weight: bold;
+      width: 35px;
+      text-align: right;
+    }
+
+    /* score display */
+    #score-display {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 20px;
+      text-shadow: 2px 2px 4px #000;
+      pointer-events: none;
+      z-index: 50;
+    }
+    #timer {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #aaa;
+      font-size: 16px;
+      text-shadow: 2px 2px 4px #000;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* crosshair */
+    #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 50;
+    }
+    #crosshair::before, #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    #crosshair::before {
+      width: 2px;
+      height: 16px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #crosshair::after {
+      width: 16px;
+      height: 2px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* start screen */
+    #start-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+    #start-screen.hidden { display: none; }
+    #start-screen h1 {
+      color: #f44;
+      font-size: 48px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    .difficulty-container {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .difficulty-label {
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    #diff-level {
+      font-size: 48px;
+      font-weight: bold;
+      color: #f44;
+      display: block;
+    }
+    .difficulty-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 280px;
+      height: 12px;
+      background: linear-gradient(to right,
+        #004400 0%, #114411 10%,
+        #333300 40%, #554400 50%,
+        #663300 70%, #880000 90%, #aa0000 100%
+      );
+      border-radius: 6px;
+      border: 2px solid #333;
+      outline: none;
+      cursor: pointer;
+    }
+    .difficulty-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle at 30% 30%, #ff6666, #cc0000 50%, #880000);
+      border: 3px solid #ff4444;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+    }
+    .start-btn {
+      background: linear-gradient(to bottom, #660000, #440000);
+      border: 2px solid #880000;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      padding: 15px 50px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .start-btn:hover {
+      background: linear-gradient(to bottom, #880000, #660000);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    #highscore {
+      color: #888;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    #controls-hint {
+      color: #666;
+      margin-top: 30px;
+      font-size: 12px;
+    }
+
+    /* game over modal */
+    #modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+    #modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: linear-gradient(to bottom, #2a1a1a, #1a0a0a);
+      border: 3px solid #440000;
+      border-radius: 10px;
+      padding: 40px 60px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
+      pointer-events: auto;
+    }
+    .modal-card h2 {
+      color: #f44;
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    #score-breakdown {
+      color: #ccc;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .score-line { margin: 5px 0; }
+    .score-line.highlight { color: #4f4; }
+    .score-total {
+      color: #fff;
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    #new-highscore {
+      color: #ff0;
+      font-size: 18px;
+      margin: 10px 0;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- start screen -->
+  <div id="start-screen">
+    <h1>FPS GAME</h1>
+    <div class="difficulty-container">
+      <div class="difficulty-label">
+        <span id="diff-name">MODERATE</span>
+        <span id="diff-level">5</span>
+      </div>
+      <input type="range" id="diff-slider" class="difficulty-slider" min="1" max="10" value="5">
+    </div>
+    <div id="highscore">No high score yet</div>
+    <button id="start-btn" class="start-btn">START GAME</button>
+    <div id="controls-hint">WASD: Move | Mouse: Look | Click/Space: Shoot | R: Restart</div>
+  </div>
+
+  <!-- game over modal -->
+  <div id="modal-overlay" class="hidden">
+    <div class="modal-card">
+      <h2 id="modal-title">GAME OVER</h2>
+      <div id="score-breakdown"></div>
+      <div id="new-highscore">★ NEW HIGH SCORE! ★</div>
+      <div class="difficulty-container" style="margin-top: 20px;">
+        <input type="range" id="modal-diff-slider" class="difficulty-slider" min="1" max="10" value="5">
+        <div id="modal-diff-label" style="color: #888; margin-top: 10px;">MODERATE (5)</div>
+      </div>
+      <button id="restart-btn" class="start-btn">RESTART [R]</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="score-display">SCORE: 0</div>
+  <div id="timer">0:00</div>
+  <div id="crosshair"></div>
+  <div id="hud">
+    <div class="stat-row">
+      <span class="stat-label">HEALTH</span>
+      <div class="stat-bar-bg"><div id="health-bar" class="stat-bar-fill" style="width: 100%"></div></div>
+      <span id="health-value" class="stat-value">100</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">ARMOR</span>
+      <div class="stat-bar-bg"><div id="armor-bar" class="stat-bar-fill" style="width: 0%"></div></div>
+      <span id="armor-value" class="stat-value">0</span>
+    </div>
+  </div>
+
+  <!-- weapon canvas overlay -->
+  <canvas id="weapon-canvas" style="position:absolute; bottom:0; left:0; pointer-events:none; z-index:40;"></canvas>
+
+  <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script type="module">
+    import * as THREE from 'three'
+
+    // ============================================
+    // DIFFICULTY SYSTEM
+    // ============================================
+    const DIFFICULTY_NAMES = [
+      '', 'ROOKIE', 'EASY', 'CASUAL', 'NORMAL', 'MODERATE',
+      'CHALLENGING', 'HARD', 'VETERAN', 'NIGHTMARE', 'IMPOSSIBLE'
+    ]
+    let currentDifficulty = 5
+
+    function lerp(a, b, t) { return a + (b - a) * t }
+
+    function getDifficultyConfig(level) {
+      const t = (level - 1) / 9
+      return {
+        enemyCount: Math.floor(lerp(5, 15, t)),
+        enemyHealth: Math.floor(lerp(30, 80, t)),
+        enemySpeed: lerp(2.0, 4.0, t),
+        enemyDamage: Math.floor(lerp(8, 20, t)),
+        enemyAttackRange: lerp(12, 20, t),
+        enemyAttackRate: lerp(2.0, 1.0, t),
+        playerHealth: Math.floor(lerp(150, 100, t)),
+        scoreMultiplier: lerp(0.5, 2.0, t),
+      }
+    }
+
+    // ============================================
+    // GAME STATE
+    // ============================================
+    const state = {
+      health: 100,
+      maxHealth: 100,
+      armor: 0,
+      kills: 0,
+      shotsHit: 0,
+      shotsFired: 0,
+    }
+    let gameStarted = false
+    let gameOver = false
+    let gameTime = 0
+
+    const player = { x: 0, z: 0, radius: 0.5 }
+    let playerYaw = 0
+    const enemies = []
+    const keys = {}
+
+    // ============================================
+    // THREE.JS SETUP
+    // ============================================
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x1a1a2e)
+    scene.fog = new THREE.Fog(0x1a1a2e, 10, 40)
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+    camera.position.y = 1.6
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    document.body.appendChild(renderer.domElement)
+
+    // lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+    const sun = new THREE.DirectionalLight(0xffffff, 0.5)
+    sun.position.set(5, 10, 5)
+    scene.add(sun)
+
+    // ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 50),
+      new THREE.MeshStandardMaterial({ color: 0x333333 })
+    )
+    ground.rotation.x = -Math.PI / 2
+    scene.add(ground)
+
+    // simple walls (demo level)
+    const MAP = [
+      [1,1,1,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,0,0,1,1,0,1],
+      [1,0,1,0,0,0,0,1,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,1,0,0,0,0,1,0,1],
+      [1,0,1,1,0,0,1,1,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1],
+    ]
+    const TILE_SIZE = 4
+
+    function buildLevel() {
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x555555 })
+      for (let z = 0; z < MAP.length; z++) {
+        for (let x = 0; x < MAP[0].length; x++) {
+          if (MAP[z][x] === 1) {
+            const wall = new THREE.Mesh(
+              new THREE.BoxGeometry(TILE_SIZE, 3, TILE_SIZE),
+              wallMat
+            )
+            wall.position.set(
+              x * TILE_SIZE - (MAP[0].length * TILE_SIZE / 2) + TILE_SIZE / 2,
+              1.5,
+              z * TILE_SIZE - (MAP.length * TILE_SIZE / 2) + TILE_SIZE / 2
+            )
+            scene.add(wall)
+          }
+        }
+      }
+    }
+    buildLevel()
+
+    // ============================================
+    // POINTER LOCK
+    // ============================================
+    let isPointerLocked = false
+
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = document.pointerLockElement === renderer.domElement
+    })
+
+    renderer.domElement.addEventListener('click', () => {
+      if (gameStarted && !gameOver && !isPointerLocked) {
+        renderer.domElement.requestPointerLock()
+      }
+    })
+
+    // re-request on focus (handles alt-tab)
+    window.addEventListener('focus', () => {
+      if (gameStarted && !gameOver && !isPointerLocked) {
+        setTimeout(() => renderer.domElement.requestPointerLock(), 100)
+      }
+    })
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isPointerLocked) return
+      playerYaw -= e.movementX * 0.002
+    })
+
+    // ============================================
+    // INPUT
+    // ============================================
+    window.addEventListener('keydown', (e) => {
+      keys[e.code] = true
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (gameStarted && !gameOver) shoot()
+      }
+      if (e.code === 'KeyR' && gameOver) restart()
+    })
+    window.addEventListener('keyup', (e) => keys[e.code] = false)
+
+    document.addEventListener('click', () => {
+      if (gameStarted && !gameOver && isPointerLocked) shoot()
+    })
+
+    // ============================================
+    // COLLISION
+    // ============================================
+    function worldToTile(wx, wz) {
+      const offsetX = MAP[0].length * TILE_SIZE / 2
+      const offsetZ = MAP.length * TILE_SIZE / 2
+      return {
+        x: Math.floor((wx + offsetX) / TILE_SIZE),
+        z: Math.floor((wz + offsetZ) / TILE_SIZE)
+      }
+    }
+
+    function checkWallCollision(x, z, radius = 0.5) {
+      const offsets = [[-radius, -radius], [radius, -radius], [-radius, radius], [radius, radius]]
+      for (const [ox, oz] of offsets) {
+        const tile = worldToTile(x + ox, z + oz)
+        if (tile.z < 0 || tile.z >= MAP.length || tile.x < 0 || tile.x >= MAP[0].length) return true
+        if (MAP[tile.z][tile.x] === 1) return true
+      }
+      return false
+    }
+
+    function hasLineOfSight(from, to) {
+      const dx = to.x - from.x, dz = to.z - from.z
+      const dist = Math.sqrt(dx * dx + dz * dz)
+      if (dist < 0.1) return true
+      const dirX = dx / dist, dirZ = dz / dist
+      const steps = Math.floor(dist / 0.5)
+      for (let i = 1; i < steps; i++) {
+        if (checkWallCollision(from.x + dirX * 0.5 * i, from.z + dirZ * 0.5 * i, 0.1)) return false
+      }
+      return true
+    }
+
+    // ============================================
+    // ENEMIES
+    // ============================================
+    function createEnemy(x, z) {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 64
+      const ctx = canvas.getContext('2d')
+      drawEnemy(ctx, 'idle', 0)
+
+      const texture = new THREE.CanvasTexture(canvas)
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true })
+      const sprite = new THREE.Sprite(material)
+      sprite.scale.set(2, 2, 1)
+      sprite.position.set(x, 1, z)
+      scene.add(sprite)
+
+      return {
+        x, z,
+        health: getDifficultyConfig(currentDifficulty).enemyHealth,
+        state: 'idle',
+        walkPhase: 0,
+        attackCooldown: Math.random() * 2,
+        sprite,
+        canvas,
+        ctx,
+      }
+    }
+
+    function drawEnemy(ctx, state, walkPhase) {
+      ctx.clearRect(0, 0, 64, 64)
+      const cx = 32, cy = 40
+
+      // body
+      ctx.fillStyle = '#4a6'
+      ctx.beginPath()
+      ctx.ellipse(cx, cy - 10, 10, 14, 0, 0, Math.PI * 2)
+      ctx.fill()
+
+      // head
+      ctx.fillStyle = '#da9'
+      ctx.beginPath()
+      ctx.arc(cx, cy - 28, 7, 0, Math.PI * 2)
+      ctx.fill()
+
+      // legs
+      const legSwing = state === 'walk' ? Math.sin(walkPhase) * 5 : 0
+      ctx.fillStyle = '#345'
+      ctx.fillRect(cx - 7 + legSwing, cy + 2, 5, 16)
+      ctx.fillRect(cx + 2 - legSwing, cy + 2, 5, 16)
+
+      // arms
+      if (state === 'shoot') {
+        ctx.fillStyle = '#4a6'
+        ctx.fillRect(cx - 18, cy - 12, 8, 4)
+        ctx.fillRect(cx + 10, cy - 12, 8, 4)
+        ctx.fillStyle = '#333'
+        ctx.fillRect(cx - 2, cy - 20, 4, 12)
+      } else {
+        ctx.fillStyle = '#4a6'
+        ctx.fillRect(cx - 14, cy - 6, 4, 10)
+        ctx.fillRect(cx + 10, cy - 6, 4, 10)
+      }
+    }
+
+    function updateEnemy(enemy, delta) {
+      if (enemy.health <= 0) return
+
+      const cfg = getDifficultyConfig(currentDifficulty)
+      enemy.attackCooldown -= delta
+
+      const dx = player.x - enemy.x, dz = player.z - enemy.z
+      const dist = Math.sqrt(dx * dx + dz * dz)
+      const canSee = dist < 20 && hasLineOfSight(enemy, player)
+
+      if (canSee) {
+        if (dist > cfg.enemyAttackRange * 0.6) {
+          // move toward player
+          enemy.state = 'walk'
+          const moveX = (dx / dist) * cfg.enemySpeed * delta
+          const moveZ = (dz / dist) * cfg.enemySpeed * delta
+          if (!checkWallCollision(enemy.x + moveX, enemy.z + moveZ, 0.4)) {
+            enemy.x += moveX
+            enemy.z += moveZ
+          }
+          enemy.walkPhase += delta * 8
+        }
+
+        if (dist < cfg.enemyAttackRange && enemy.attackCooldown <= 0 && hasLineOfSight(enemy, player)) {
+          enemy.state = 'shoot'
+          // deal damage
+          const damage = Math.random() < 0.6 ? cfg.enemyDamage : 0
+          if (damage > 0) {
+            if (state.armor > 0) {
+              const armorAbsorb = Math.min(state.armor, damage * 0.6)
+              state.armor -= armorAbsorb
+              state.health -= damage - armorAbsorb
+            } else {
+              state.health -= damage
+            }
+            updateHUD()
+            if (state.health <= 0) endGame(false)
+          }
+          enemy.attackCooldown = cfg.enemyAttackRate
+        }
+      } else {
+        enemy.state = 'idle'
+      }
+
+      // update sprite
+      enemy.sprite.position.set(enemy.x, 1, enemy.z)
+      drawEnemy(enemy.ctx, enemy.state, enemy.walkPhase)
+      enemy.sprite.material.map.needsUpdate = true
+    }
+
+    // ============================================
+    // SHOOTING
+    // ============================================
+    let weaponRecoil = 0
+    let muzzleFlash = 0
+
+    function shoot() {
+      state.shotsFired++
+      weaponRecoil = 1
+      muzzleFlash = 0.05
+
+      // find closest enemy in crosshairs
+      let closestEnemy = null
+      let closestDist = 25
+
+      for (const enemy of enemies) {
+        if (enemy.health <= 0) continue
+
+        const dx = enemy.x - player.x, dz = enemy.z - player.z
+        const dist = Math.sqrt(dx * dx + dz * dz)
+        const angleToEnemy = Math.atan2(-dx, -dz)
+
+        let angleDiff = angleToEnemy - playerYaw
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2
+
+        if (Math.abs(angleDiff) < 0.15 && dist < closestDist && hasLineOfSight(player, enemy)) {
+          closestEnemy = enemy
+          closestDist = dist
+        }
+      }
+
+      if (closestEnemy) {
+        state.shotsHit++
+        closestEnemy.health -= 25
+        if (closestEnemy.health <= 0) {
+          scene.remove(closestEnemy.sprite)
+          state.kills++
+          updateScoreDisplay()
+          checkWinCondition()
+        }
+      }
+    }
+
+    function checkWinCondition() {
+      const cfg = getDifficultyConfig(currentDifficulty)
+      if (state.kills >= cfg.enemyCount) {
+        endGame(true)
+      }
+    }
+
+    // ============================================
+    // WEAPON DRAWING
+    // ============================================
+    const weaponCanvas = document.getElementById('weapon-canvas')
+    const wctx = weaponCanvas.getContext('2d')
+
+    function resizeWeaponCanvas() {
+      weaponCanvas.width = window.innerWidth
+      weaponCanvas.height = window.innerHeight
+    }
+    resizeWeaponCanvas()
+
+    function drawWeapon() {
+      wctx.clearRect(0, 0, weaponCanvas.width, weaponCanvas.height)
+      if (!gameStarted || gameOver) return
+
+      const cx = weaponCanvas.width / 2
+      const baseY = weaponCanvas.height - 80
+      const recoilOffset = weaponRecoil * 25
+      const y = baseY + recoilOffset
+
+      wctx.save()
+      wctx.translate(cx, y)
+
+      // barrel
+      wctx.fillStyle = '#444'
+      wctx.fillRect(-6, -70, 12, 50)
+
+      // body
+      wctx.fillStyle = '#333'
+      wctx.fillRect(-16, -20, 32, 45)
+
+      // grip
+      wctx.fillStyle = '#5c3a21'
+      wctx.fillRect(-10, 25, 20, 35)
+
+      // highlight
+      wctx.fillStyle = 'rgba(255,255,255,0.15)'
+      wctx.fillRect(-4, -65, 3, 40)
+
+      wctx.restore()
+
+      // muzzle flash
+      if (muzzleFlash > 0) {
+        wctx.save()
+        wctx.translate(cx, y - 80)
+        const grad = wctx.createRadialGradient(0, 0, 0, 0, 0, 35)
+        grad.addColorStop(0, 'rgba(255, 255, 200, 1)')
+        grad.addColorStop(0.3, 'rgba(255, 200, 50, 0.8)')
+        grad.addColorStop(1, 'rgba(255, 100, 0, 0)')
+        wctx.fillStyle = grad
+        wctx.beginPath()
+        wctx.arc(0, 0, 35, 0, Math.PI * 2)
+        wctx.fill()
+        wctx.restore()
+      }
+    }
+
+    // ============================================
+    // HUD UPDATES
+    // ============================================
+    function updateHUD() {
+      const healthPct = state.health / state.maxHealth
+      document.getElementById('health-bar').style.width = `${healthPct * 100}%`
+      document.getElementById('health-bar').style.background =
+        healthPct > 0.6 ? 'linear-gradient(to right, #0a0, #4f4)' :
+        healthPct > 0.3 ? 'linear-gradient(to right, #aa0, #ff0)' :
+        'linear-gradient(to right, #a00, #f44)'
+      document.getElementById('health-value').textContent = Math.floor(state.health)
+
+      const armorPct = state.armor / 100
+      document.getElementById('armor-bar').style.width = `${armorPct * 100}%`
+      document.getElementById('armor-value').textContent = Math.floor(state.armor)
+    }
+
+    function updateScoreDisplay() {
+      const cfg = getDifficultyConfig(currentDifficulty)
+      const score = Math.floor((state.kills * 500 + state.shotsHit * 50) * cfg.scoreMultiplier)
+      document.getElementById('score-display').textContent = `SCORE: ${score}`
+    }
+
+    function updateTimer() {
+      const mins = Math.floor(gameTime / 60)
+      const secs = Math.floor(gameTime % 60)
+      document.getElementById('timer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    // ============================================
+    // SCORING & PERSISTENCE
+    // ============================================
+    function calculateFinalScore(won) {
+      const cfg = getDifficultyConfig(currentDifficulty)
+      const killPts = state.kills * 500
+      const hitPts = state.shotsHit * 50
+      const healthPts = Math.floor(state.health) * 30
+      const armorPts = Math.floor(state.armor) * 15
+      const accuracy = state.shotsFired > 0 ? state.shotsHit / state.shotsFired : 0
+      const accuracyPts = Math.floor(accuracy * 1500)
+      const timePts = won ? Math.max(0, Math.floor(300 - gameTime) * 15) : 0
+      const completePts = won ? 2000 : 0
+      const raw = killPts + hitPts + healthPts + armorPts + accuracyPts + timePts + completePts
+      return { total: Math.floor(raw * cfg.scoreMultiplier), breakdown: { killPts, hitPts, healthPts, armorPts, accuracyPts, timePts, completePts, mult: cfg.scoreMultiplier } }
+    }
+
+    function loadHighScore(diff) {
+      try {
+        const data = JSON.parse(localStorage.getItem('fps_highscores') || '{}')
+        return data[`d${diff}`] || 0
+      } catch { return 0 }
+    }
+
+    function saveHighScore(diff, score) {
+      try {
+        const data = JSON.parse(localStorage.getItem('fps_highscores') || '{}')
+        if (score > (data[`d${diff}`] || 0)) {
+          data[`d${diff}`] = score
+          localStorage.setItem('fps_highscores', JSON.stringify(data))
+          return true
+        }
+      } catch {}
+      return false
+    }
+
+    // ============================================
+    // GAME FLOW
+    // ============================================
+    function startGame() {
+      document.getElementById('start-screen').classList.add('hidden')
+
+      const cfg = getDifficultyConfig(currentDifficulty)
+      state.health = cfg.playerHealth
+      state.maxHealth = cfg.playerHealth
+      state.armor = 0
+      state.kills = 0
+      state.shotsHit = 0
+      state.shotsFired = 0
+      gameTime = 0
+
+      player.x = 0
+      player.z = 0
+      playerYaw = 0
+
+      enemies.forEach(e => scene.remove(e.sprite))
+      enemies.length = 0
+
+      // spawn enemies
+      for (let i = 0; i < cfg.enemyCount; i++) {
+        let x, z, attempts = 0
+        do {
+          x = (Math.random() - 0.5) * 30
+          z = (Math.random() - 0.5) * 30
+          attempts++
+        } while ((checkWallCollision(x, z, 1) || Math.sqrt(x*x + z*z) < 8) && attempts < 50)
+        enemies.push(createEnemy(x, z))
+      }
+
+      updateHUD()
+      updateScoreDisplay()
+      updateTimer()
+
+      gameStarted = true
+      gameOver = false
+
+      renderer.domElement.requestPointerLock()
+    }
+
+    function endGame(won) {
+      gameOver = true
+      document.exitPointerLock()
+
+      const score = calculateFinalScore(won)
+      const isNewHS = saveHighScore(currentDifficulty, score.total)
+
+      document.getElementById('modal-title').textContent = won ? 'MISSION COMPLETE' : 'GAME OVER'
+      document.getElementById('score-breakdown').innerHTML = `
+        <div class="score-line">Kills: +${score.breakdown.killPts}</div>
+        <div class="score-line">Accuracy: +${score.breakdown.accuracyPts}</div>
+        <div class="score-line">Health: +${score.breakdown.healthPts}</div>
+        ${won ? `<div class="score-line highlight">Time Bonus: +${score.breakdown.timePts}</div>` : ''}
+        ${won ? `<div class="score-line highlight">Complete: +${score.breakdown.completePts}</div>` : ''}
+        <div class="score-line">Multiplier: ×${score.breakdown.mult.toFixed(1)}</div>
+        <div class="score-total">TOTAL: ${score.total}</div>
+      `
+      document.getElementById('new-highscore').style.display = isNewHS ? 'block' : 'none'
+      document.getElementById('modal-diff-slider').value = currentDifficulty
+      document.getElementById('modal-diff-label').textContent = `${DIFFICULTY_NAMES[currentDifficulty]} (${currentDifficulty})`
+      document.getElementById('modal-overlay').classList.remove('hidden')
+    }
+
+    function restart() {
+      document.getElementById('modal-overlay').classList.add('hidden')
+      startGame()
+    }
+
+    // ============================================
+    // DIFFICULTY UI
+    // ============================================
+    function updateDifficultyUI(slider, nameEl, levelEl) {
+      const level = parseInt(slider.value)
+      currentDifficulty = level
+      if (nameEl) nameEl.textContent = DIFFICULTY_NAMES[level]
+      if (levelEl) levelEl.textContent = level
+      const hs = loadHighScore(level)
+      document.getElementById('highscore').textContent = hs > 0 ? `Best: ${hs}` : 'No high score yet'
+    }
+
+    document.getElementById('diff-slider').addEventListener('input', (e) => {
+      updateDifficultyUI(e.target, document.getElementById('diff-name'), document.getElementById('diff-level'))
+    })
+
+    document.getElementById('modal-diff-slider').addEventListener('input', (e) => {
+      const level = parseInt(e.target.value)
+      currentDifficulty = level
+      document.getElementById('modal-diff-label').textContent = `${DIFFICULTY_NAMES[level]} (${level})`
+    })
+
+    document.getElementById('start-btn').addEventListener('click', startGame)
+    document.getElementById('restart-btn').addEventListener('click', restart)
+
+    updateDifficultyUI(document.getElementById('diff-slider'), document.getElementById('diff-name'), document.getElementById('diff-level'))
+
+    // ============================================
+    // GAME LOOP
+    // ============================================
+    const clock = new THREE.Clock()
+
+    function animate() {
+      requestAnimationFrame(animate)
+      const delta = clock.getDelta()
+
+      if (gameStarted && !gameOver) {
+        gameTime += delta
+
+        // movement
+        const forward = new THREE.Vector3(-Math.sin(playerYaw), 0, -Math.cos(playerYaw))
+        const right = new THREE.Vector3(Math.cos(playerYaw), 0, -Math.sin(playerYaw))
+        let mx = 0, mz = 0
+        if (keys['KeyW']) { mx += forward.x; mz += forward.z }
+        if (keys['KeyS']) { mx -= forward.x; mz -= forward.z }
+        if (keys['KeyA']) { mx -= right.x; mz -= right.z }
+        if (keys['KeyD']) { mx += right.x; mz += right.z }
+        const len = Math.sqrt(mx*mx + mz*mz)
+        if (len > 0) {
+          mx = (mx/len) * 5 * delta
+          mz = (mz/len) * 5 * delta
+          if (!checkWallCollision(player.x + mx, player.z, 0.5)) player.x += mx
+          if (!checkWallCollision(player.x, player.z + mz, 0.5)) player.z += mz
+        }
+
+        // camera
+        camera.position.x = player.x
+        camera.position.z = player.z
+        camera.rotation.y = playerYaw
+
+        // enemies
+        enemies.forEach(e => updateEnemy(e, delta))
+
+        // weapon
+        if (weaponRecoil > 0) weaponRecoil -= delta * 12
+        if (weaponRecoil < 0) weaponRecoil = 0
+        if (muzzleFlash > 0) muzzleFlash -= delta
+
+        updateTimer()
+      }
+
+      drawWeapon()
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    // resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+      resizeWeaponCanvas()
+    })
+  </script>
+</body>
+</html>
