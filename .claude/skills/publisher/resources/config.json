@@ -1,0 +1,24 @@
+{
+  "active_provider": "scp",
+
+  "scp": {
+    "host": "myserver",
+    "destination_path": "/var/www/html/visuals",
+    "public_url_base": "https://myserver.com/visuals"
+  },
+
+  "s3": {
+    "bucket": "salvador-visuals",
+    "region": "us-east-1",
+    "acl": "public-read"
+  },
+
+  "http": {
+    "endpoint": "https://api.myserver.com/v1/upload",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer FILL_ME_IN",
+      "Content-Type": "multipart/form-data"
+    }
+  }
+}

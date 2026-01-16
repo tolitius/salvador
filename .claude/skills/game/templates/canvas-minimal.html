@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #1a1a2e; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+    }
+    canvas { 
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="800" height="600"></canvas>
+  <script>
+    // ============================================
+    // CANVAS SETUP
+    // ============================================
+    const canvas = document.getElementById('game')
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width
+    const H = canvas.height
+
+    // ============================================
+    // GAME STATE
+    // ============================================
+    let state = 'menu'  // 'menu', 'play', 'gameover'
+    let score = 0
+    let mouseX = 0
+    let mouseY = 0
+
+    // ============================================
+    // COLORS
+    // ============================================
+    const COLORS = {
+      bg: '#1a1a2e',
+      text: '#ffffff',
+      accent: '#4a9eff',
+      success: '#4ade80',
+      danger: '#f87171',
+      muted: '#6b7280',
+    }
+
+    // ============================================
+    // INPUT HANDLING
+    // ============================================
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect()
+      mouseX = e.clientX - rect.left
+      mouseY = e.clientY - rect.top
+    })
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      handleClick(x, y)
+    })
+
+    window.addEventListener('keydown', (e) => {
+      handleKey(e.key)
+    })
+
+    // ============================================
+    // CLICK HANDLER
+    // ============================================
+    function handleClick(x, y) {
+      if (state === 'menu') {
+        // start button area
+        if (x > W/2 - 100 && x < W/2 + 100 && y > 280 && y < 330) {
+          state = 'play'
+          score = 0
+        }
+      } else if (state === 'play') {
+        // game click logic here
+      } else if (state === 'gameover') {
+        // restart button area
+        if (x > W/2 - 100 && x < W/2 + 100 && y > 300 && y < 350) {
+          state = 'play'
+          score = 0
+        }
+      }
+    }
+
+    // ============================================
+    // KEY HANDLER
+    // ============================================
+    function handleKey(key) {
+      if (state === 'menu') {
+        if (key === ' ' || key === 'Enter') {
+          state = 'play'
+          score = 0
+        }
+      } else if (state === 'play') {
+        // game key logic here
+        if (key === 'Escape') state = 'menu'
+      } else if (state === 'gameover') {
+        if (key === 'r' || key === 'R') {
+          state = 'play'
+          score = 0
+        }
+        if (key === 'Escape') state = 'menu'
+      }
+    }
+
+    // ============================================
+    // DRAWING HELPERS
+    // ============================================
+    function drawText(text, x, y, { size = 24, color = COLORS.text, align = 'center' } = {}) {
+      ctx.font = `${size}px system-ui, sans-serif`
+      ctx.fillStyle = color
+      ctx.textAlign = align
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, x, y)
+    }
+
+    function drawRect(x, y, w, h, color) {
+      ctx.fillStyle = color
+      ctx.fillRect(x, y, w, h)
+    }
+
+    function drawRoundRect(x, y, w, h, radius, color) {
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.roundRect(x, y, w, h, radius)
+      ctx.fill()
+    }
+
+    function drawCircle(x, y, r, color) {
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    function drawButton(text, x, y, w, h, isHovered) {
+      const color = isHovered ? COLORS.accent : '#374151'
+      drawRoundRect(x - w/2, y - h/2, w, h, 8, color)
+      drawText(text, x, y, { size: 20 })
+    }
+
+    // ============================================
+    // MENU SCREEN
+    // ============================================
+    function drawMenu() {
+      drawText('GAME TITLE', W/2, 150, { size: 48 })
+      
+      // start button
+      const btnHovered = mouseX > W/2-100 && mouseX < W/2+100 && mouseY > 280 && mouseY < 330
+      drawButton('Start Game', W/2, 305, 200, 50, btnHovered)
+      
+      drawText('Click or press SPACE to start', W/2, 400, { size: 16, color: COLORS.muted })
+    }
+
+    // ============================================
+    // GAME SCREEN
+    // ============================================
+    function updateGame(dt) {
+      // game update logic here
+    }
+
+    function drawGame() {
+      // draw game elements here
+      drawText(`Score: ${score}`, 60, 30, { size: 20, align: 'left' })
+      
+      // placeholder - remove this
+      drawText('Game goes here', W/2, H/2, { size: 32, color: COLORS.muted })
+      drawText('Press ESC for menu', W/2, H - 30, { size: 14, color: COLORS.muted })
+    }
+
+    // ============================================
+    // GAME OVER SCREEN
+    // ============================================
+    function drawGameOver() {
+      drawText('GAME OVER', W/2, 150, { size: 48, color: COLORS.danger })
+      drawText(`Final Score: ${score}`, W/2, 230, { size: 32 })
+      
+      // restart button
+      const btnHovered = mouseX > W/2-100 && mouseX < W/2+100 && mouseY > 300 && mouseY < 350
+      drawButton('Play Again', W/2, 325, 200, 50, btnHovered)
+      
+      drawText('Press R to restart | ESC for menu', W/2, 420, { size: 14, color: COLORS.muted })
+    }
+
+    // ============================================
+    // MAIN LOOP
+    // ============================================
+    let lastTime = 0
+
+    function gameLoop(timestamp) {
+      const dt = (timestamp - lastTime) / 1000
+      lastTime = timestamp
+
+      // clear
+      drawRect(0, 0, W, H, COLORS.bg)
+
+      // state machine
+      switch (state) {
+        case 'menu':
+          drawMenu()
+          break
+        case 'play':
+          updateGame(dt)
+          drawGame()
+          break
+        case 'gameover':
+          drawGameOver()
+          break
+      }
+
+      requestAnimationFrame(gameLoop)
+    }
+
+    // start
+    requestAnimationFrame(gameLoop)
+  </script>
+</body>
+</html>

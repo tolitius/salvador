@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0d1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <script src="https://unpkg.com/kaplay@3001/dist/kaplay.js"></script>
+  <script>
+    // ============================================
+    // COLOR PALETTES (pick one)
+    // ============================================
+    const PASTEL = {
+      bg: "#2d2d44", bgLight: "#3d3d5c",
+      player: "#7ec8e3", playerDark: "#5ba3c0",
+      coin: "#ffd93d", coinDark: "#c9a227",
+      danger: "#ff6b6b", dangerDark: "#c94444",
+      safe: "#6bcb77", safeDark: "#4a9e54",
+      platform: "#6c7a89", platformDark: "#4a5568",
+      text: "#e8e8e8", textDim: "#9090a0",
+    }
+
+    const PICO8 = {
+      bg: "#1D2B53", bgLight: "#7E2553",
+      player: "#29ADFF", playerDark: "#1D2B53",
+      coin: "#FFEC27", coinDark: "#FFA300",
+      danger: "#FF004D", dangerDark: "#7E2553",
+      safe: "#00E436", safeDark: "#008751",
+      platform: "#5F574F", platformDark: "#1D2B53",
+      text: "#FFF1E8", textDim: "#C2C3C7",
+    }
+
+    const NEON = {
+      bg: "#0f0f23", bgLight: "#1a1a3e",
+      player: "#00fff5", playerDark: "#00b8b0",
+      coin: "#ffff00", coinDark: "#b0b000",
+      danger: "#ff00ff", dangerDark: "#b000b0",
+      safe: "#05ffa1", safeDark: "#00b870",
+      platform: "#464666", platformDark: "#2a2a4a",
+      text: "#ffffff", textDim: "#8080a0",
+    }
+
+    // === SELECT YOUR PALETTE ===
+    const P = PASTEL
+
+    // ============================================
+    // PROCEDURAL SPRITE GENERATORS
+    // ============================================
+
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ] : [0, 0, 0]
+    }
+
+    // gradient background with optional stars
+    function makeGradientBg(colorTop, colorBottom, w = 800, h = 600, stars = true) {
+      const c = document.createElement("canvas")
+      c.width = w; c.height = h
+      const ctx = c.getContext("2d")
+      const grad = ctx.createLinearGradient(0, 0, 0, h)
+      grad.addColorStop(0, colorTop)
+      grad.addColorStop(1, colorBottom)
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, w, h)
+      if (stars) {
+        ctx.fillStyle = "rgba(255,255,255,0.15)"
+        for (let i = 0; i < 40; i++) {
+          const x = Math.random() * w
+          const y = Math.random() * h * 0.7
+          const r = Math.random() * 2 + 0.5
+          ctx.beginPath()
+          ctx.arc(x, y, r, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
+      return c.toDataURL()
+    }
+
+    // player character with eyes and gradient
+    function makePlayerSprite(size = 48) {
+      const c = document.createElement("canvas")
+      c.width = c.height = size
+      const ctx = c.getContext("2d")
+      const cx = size/2, cy = size/2, r = size * 0.4
+
+      // shadow
+      ctx.fillStyle = "rgba(0,0,0,0.25)"
+      ctx.beginPath()
+      ctx.ellipse(cx, cy + r*0.9, r*0.8, r*0.25, 0, 0, Math.PI*2)
+      ctx.fill()
+
+      // body gradient
+      const grad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, 0, cx, cy, r)
+      grad.addColorStop(0, P.player)
+      grad.addColorStop(1, P.playerDark)
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.fill()
+
+      // eyes
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.ellipse(cx - r*0.3, cy - r*0.1, r*0.2, r*0.25, 0, 0, Math.PI*2)
+      ctx.ellipse(cx + r*0.3, cy - r*0.1, r*0.2, r*0.25, 0, 0, Math.PI*2)
+      ctx.fill()
+
+      // pupils
+      ctx.fillStyle = "#1a1a2e"
+      ctx.beginPath()
+      ctx.arc(cx - r*0.25, cy - r*0.05, r*0.1, 0, Math.PI*2)
+      ctx.arc(cx + r*0.35, cy - r*0.05, r*0.1, 0, Math.PI*2)
+      ctx.fill()
+
+      // highlight
+      ctx.fillStyle = "rgba(255,255,255,0.4)"
+      ctx.beginPath()
+      ctx.ellipse(cx - r*0.3, cy - r*0.4, r*0.15, r*0.1, -0.5, 0, Math.PI*2)
+      ctx.fill()
+
+      return c.toDataURL()
+    }
+
+    // shiny coin with glow and star
+    function makeCoinSprite(size = 32) {
+      const c = document.createElement("canvas")
+      c.width = c.height = size
+      const ctx = c.getContext("2d")
+      const cx = size/2, cy = size/2, r = size * 0.35
+
+      // outer glow
+      const glow = ctx.createRadialGradient(cx, cy, r*0.5, cx, cy, r*1.3)
+      glow.addColorStop(0, P.coin + "50")
+      glow.addColorStop(1, "transparent")
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, size, size)
+
+      // coin gradient
+      const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r)
+      grad.addColorStop(0, P.coin)
+      grad.addColorStop(0.5, "#fffacd")
+      grad.addColorStop(1, P.coinDark)
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.fill()
+
+      // inner ring
+      ctx.strokeStyle = P.coinDark
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(cx, cy, r * 0.65, 0, Math.PI * 2)
+      ctx.stroke()
+
+      // sparkle
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      const sr = r * 0.25
+      for (let i = 0; i < 4; i++) {
+        const angle = (i * Math.PI / 2) - Math.PI/4
+        ctx.lineTo(cx + Math.cos(angle) * sr, cy + Math.sin(angle) * sr)
+        const angle2 = angle + Math.PI/4
+        ctx.lineTo(cx + Math.cos(angle2) * sr*0.4, cy + Math.sin(angle2) * sr*0.4)
+      }
+      ctx.closePath()
+      ctx.fill()
+
+      return c.toDataURL()
+    }
+
+    // dangerous spike with glow
+    function makeSpikeSprite(size = 32) {
+      const c = document.createElement("canvas")
+      c.width = c.height = size
+      const ctx = c.getContext("2d")
+      const cx = size/2, h = size * 0.85, w = size * 0.75
+
+      // danger glow
+      const glow = ctx.createRadialGradient(cx, size*0.65, 0, cx, size*0.65, w*0.6)
+      glow.addColorStop(0, P.danger + "35")
+      glow.addColorStop(1, "transparent")
+      ctx.fillStyle = glow
+      ctx.fillRect(0, 0, size, size)
+
+      // spike gradient
+      const grad = ctx.createLinearGradient(cx, size*0.1, cx, size*0.85)
+      grad.addColorStop(0, "#fff")
+      grad.addColorStop(0.25, P.danger)
+      grad.addColorStop(1, P.dangerDark)
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.moveTo(cx, size * 0.1)
+      ctx.lineTo(cx + w/2, size * 0.85)
+      ctx.lineTo(cx - w/2, size * 0.85)
+      ctx.closePath()
+      ctx.fill()
+
+      // highlight
+      ctx.strokeStyle = "rgba(255,255,255,0.5)"
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(cx, size * 0.12)
+      ctx.lineTo(cx - w/2 + 3, size * 0.8)
+      ctx.stroke()
+
+      return c.toDataURL()
+    }
+
+    // textured platform
+    function makePlatformSprite(w = 140, h = 24) {
+      const c = document.createElement("canvas")
+      c.width = w; c.height = h
+      const ctx = c.getContext("2d")
+      const r = Math.min(6, h/3)
+
+      // gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, h)
+      grad.addColorStop(0, P.platform)
+      grad.addColorStop(1, P.platformDark)
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.roundRect(0, 0, w, h, r)
+      ctx.fill()
+
+      // top highlight
+      ctx.fillStyle = "rgba(255,255,255,0.12)"
+      ctx.fillRect(r, 2, w - r*2, 3)
+
+      // texture lines
+      ctx.strokeStyle = "rgba(0,0,0,0.08)"
+      ctx.lineWidth = 1
+      for (let x = 20; x < w - 10; x += 28) {
+        ctx.beginPath()
+        ctx.moveTo(x, 5)
+        ctx.lineTo(x, h - 4)
+        ctx.stroke()
+      }
+
+      // bottom shadow
+      ctx.fillStyle = "rgba(0,0,0,0.15)"
+      ctx.fillRect(r, h - 3, w - r*2, 2)
+
+      return c.toDataURL()
+    }
+
+    // angry enemy blob
+    function makeEnemySprite(size = 48) {
+      const c = document.createElement("canvas")
+      c.width = c.height = size
+      const ctx = c.getContext("2d")
+      const cx = size/2, cy = size/2, r = size * 0.38
+
+      // shadow
+      ctx.fillStyle = "rgba(0,0,0,0.25)"
+      ctx.beginPath()
+      ctx.ellipse(cx, cy + r*0.85, r*0.9, r*0.25, 0, 0, Math.PI*2)
+      ctx.fill()
+
+      // body
+      const grad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, 0, cx, cy, r*1.2)
+      grad.addColorStop(0, P.danger)
+      grad.addColorStop(1, P.dangerDark)
+      ctx.fillStyle = grad
+      ctx.beginPath()
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      ctx.fill()
+
+      // angry eyes
+      ctx.fillStyle = "#fff"
+      ctx.beginPath()
+      ctx.ellipse(cx - r*0.35, cy - r*0.15, r*0.22, r*0.18, -0.2, 0, Math.PI*2)
+      ctx.ellipse(cx + r*0.35, cy - r*0.15, r*0.22, r*0.18, 0.2, 0, Math.PI*2)
+      ctx.fill()
+
+      // eyebrows
+      ctx.strokeStyle = P.dangerDark
+      ctx.lineWidth = 2.5
+      ctx.lineCap = "round"
+      ctx.beginPath()
+      ctx.moveTo(cx - r*0.55, cy - r*0.4)
+      ctx.lineTo(cx - r*0.15, cy - r*0.25)
+      ctx.moveTo(cx + r*0.55, cy - r*0.4)
+      ctx.lineTo(cx + r*0.15, cy - r*0.25)
+      ctx.stroke()
+
+      // pupils
+      ctx.fillStyle = "#1a1a2e"
+      ctx.beginPath()
+      ctx.arc(cx - r*0.3, cy - r*0.1, r*0.1, 0, Math.PI*2)
+      ctx.arc(cx + r*0.4, cy - r*0.1, r*0.1, 0, Math.PI*2)
+      ctx.fill()
+
+      return c.toDataURL()
+    }
+
+    // ============================================
+    // ANIMATION HELPERS
+    // ============================================
+
+    function addFloat(obj, amplitude = 3, speed = 2) {
+      const startY = obj.pos.y
+      obj.onUpdate(() => {
+        obj.pos.y = startY + Math.sin(time() * speed + obj.pos.x * 0.01) * amplitude
+      })
+    }
+
+    function addBreathing(obj, range = 0.04, speed = 1.5) {
+      const baseScaleX = obj.scale.x
+      obj.onUpdate(() => {
+        const pulse = 1 + Math.sin(time() * speed) * range
+        obj.scale.x = baseScaleX > 0 ? pulse : -pulse
+        obj.scale.y = pulse
+      })
+    }
+
+    function addSpin(obj, speed = 60) {
+      obj.onUpdate(() => { obj.angle += speed * dt() })
+    }
+
+    // ============================================
+    // PARTICLE EFFECTS
+    // ============================================
+
+    function burstParticles(position, col, count = 8) {
+      const rgb = hexToRgb(col)
+      for (let i = 0; i < count; i++) {
+        add([
+          circle(rand(3, 6)),
+          pos(position),
+          color(rgb[0], rgb[1], rgb[2]),
+          opacity(1),
+          move(rand(0, 360), rand(80, 180)),
+          lifespan(0.4, { fade: 0.25 }),
+          scale(1),
+          z(50),
+        ])
+      }
+    }
+
+    function deathExplosion(position, col, count = 12) {
+      shake(15)
+      const rgb = hexToRgb(col)
+      flash(color(rgb[0], rgb[1], rgb[2]), 0.15)
+      for (let i = 0; i < count; i++) {
+        add([
+          circle(rand(4, 10)),
+          pos(position),
+          color(rgb[0], rgb[1], rgb[2]),
+          opacity(1),
+          move(rand(0, 360), rand(100, 250)),
+          lifespan(rand(0.3, 0.5), { fade: 0.2 }),
+          scale(rand(0.8, 1.2)),
+          z(50),
+        ])
+      }
+    }
+
+    function spawnAmbientParticle() {
+      add([
+        circle(rand(1, 2.5)),
+        pos(rand(0, width()), height() + 10),
+        color(255, 255, 255),
+        opacity(rand(0.08, 0.2)),
+        move(rand(75, 105), rand(15, 40)),
+        lifespan(rand(5, 10), { fade: 2 }),
+        scale(1),
+        z(-50),
+      ])
+    }
+
+    // ============================================
+    // Z-INDEX CONSTANTS
+    // ============================================
+    const Z = {
+      BG: -100,
+      BG_PARTICLES: -50,
+      PLATFORMS: 0,
+      PICKUPS: 10,
+      ENEMIES: 20,
+      PLAYER: 30,
+      PARTICLES: 50,
+      HUD: 100,
+    }
+
+    // ============================================
+    // GAME CONFIGURATION
+    // ============================================
+    kaplay({
+      width: 800,
+      height: 600,
+      background: hexToRgb(P.bg),
+      scale: 1,
+      debug: true,  // F1 to toggle
+    })
+
+    // ============================================
+    // LOAD PROCEDURAL SPRITES
+    // ============================================
+    loadSprite("bg", makeGradientBg(P.bgLight, P.bg))
+    loadSprite("player", makePlayerSprite(48))
+    loadSprite("coin", makeCoinSprite(32))
+    loadSprite("spike", makeSpikeSprite(32))
+    loadSprite("platform-sm", makePlatformSprite(100, 20))
+    loadSprite("platform-md", makePlatformSprite(160, 24))
+    loadSprite("platform-lg", makePlatformSprite(220, 28))
+    loadSprite("enemy", makeEnemySprite(48))
+
+    // ============================================
+    // GAME CONSTANTS
+    // ============================================
+    const SPEED = 300
+    const JUMP_FORCE = 550
+    const GRAVITY = 1600
+
+    // ============================================
+    // SCENES
+    // ============================================
+
+    scene("menu", () => {
+      // gradient background
+      add([sprite("bg"), pos(0, 0), z(Z.BG)])
+
+      // ambient particles
+      loop(0.5, spawnAmbientParticle)
+
+      add([
+        text("GAME TITLE", { size: 48 }),
+        pos(center().x, 150),
+        anchor("center"),
+        color(hexToRgb(P.text)),
+      ])
+
+      add([
+        text("Press SPACE to play", { size: 24 }),
+        pos(center().x, 300),
+        anchor("center"),
+        color(hexToRgb(P.text)),
+      ])
+
+      add([
+        text("Controls: Arrow keys to move, Space to jump", { size: 16 }),
+        pos(center().x, 450),
+        anchor("center"),
+        color(hexToRgb(P.textDim)),
+      ])
+
+      onKeyPress("space", () => go("game"))
+    })
+
+    scene("game", () => {
+      setGravity(GRAVITY)
+
+      let score = 0
+
+      // gradient background
+      add([sprite("bg"), pos(0, 0), z(Z.BG)])
+
+      // ambient particles
+      loop(0.4, spawnAmbientParticle)
+
+      // ground platform
+      add([
+        sprite("platform-lg"),
+        pos(width()/2 - 110, height() - 40),
+        area(),
+        body({ isStatic: true }),
+        z(Z.PLATFORMS),
+        "platform",
+      ])
+
+      // player with breathing animation
+      const player = add([
+        sprite("player"),
+        pos(100, 300),
+        area(),
+        body(),
+        anchor("center"),
+        scale(1),
+        z(Z.PLAYER),
+        "player",
+      ])
+      addBreathing(player)
+
+      // example coin with float animation
+      const coin = add([
+        sprite("coin"),
+        pos(400, 300),
+        area(),
+        anchor("center"),
+        z(Z.PICKUPS),
+        "coin",
+      ])
+      addFloat(coin, 4, 2.5)
+
+      // HUD
+      const scoreText = add([
+        text("Score: 0", { size: 22 }),
+        pos(20, 20),
+        fixed(),
+        z(Z.HUD),
+        color(hexToRgb(P.text)),
+      ])
+
+      add([
+        text("← → Move | Space: Jump | R: Restart", { size: 14 }),
+        pos(20, height() - 25),
+        fixed(),
+        z(Z.HUD),
+        color(hexToRgb(P.textDim)),
+      ])
+
+      function updateScore(pts) {
+        score += pts
+        scoreText.text = `Score: ${score}`
+      }
+
+      // controls
+      onUpdate(() => {
+        if (isKeyDown("left")) {
+          player.move(-SPEED, 0)
+          if (player.scale.x > 0) player.scale.x *= -1
+        }
+        if (isKeyDown("right")) {
+          player.move(SPEED, 0)
+          if (player.scale.x < 0) player.scale.x *= -1
+        }
+      })
+
+      onKeyPress("space", () => {
+        if (player.isGrounded()) {
+          player.jump(JUMP_FORCE)
+        }
+      })
+
+      onKeyPress("r", () => go("game"))
+      onKeyPress("escape", () => go("menu"))
+
+      // collect coins with particle burst
+      player.onCollide("coin", (c) => {
+        burstParticles(c.pos, P.coin, 10)
+        destroy(c)
+        updateScore(10)
+      })
+
+      // death on spike with explosion
+      player.onCollide("spike", () => {
+        deathExplosion(player.pos, P.danger)
+        destroy(player)
+        wait(0.8, () => go("gameover", score))
+      })
+
+      // fall death
+      player.onUpdate(() => {
+        if (player.pos.y > height() + 100) {
+          go("gameover", score)
+        }
+      })
+    })
+
+    scene("gameover", (finalScore) => {
+      add([sprite("bg"), pos(0, 0), z(Z.BG)])
+
+      add([
+        text("GAME OVER", { size: 48 }),
+        pos(center().x, 150),
+        anchor("center"),
+        color(hexToRgb(P.danger)),
+      ])
+
+      add([
+        text(`Score: ${finalScore}`, { size: 32 }),
+        pos(center().x, 250),
+        anchor("center"),
+        color(hexToRgb(P.text)),
+      ])
+
+      add([
+        text("Press R to restart", { size: 20 }),
+        pos(center().x, 350),
+        anchor("center"),
+        color(hexToRgb(P.text)),
+      ])
+
+      add([
+        text("Press ESC for menu", { size: 16 }),
+        pos(center().x, 400),
+        anchor("center"),
+        color(hexToRgb(P.textDim)),
+      ])
+
+      onKeyPress("r", () => go("game"))
+      onKeyPress("escape", () => go("menu"))
+    })
+
+    // ============================================
+    // START GAME
+    // ============================================
+    go("menu")
+  </script>
+</body>
+</html>
