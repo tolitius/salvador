@@ -606,3 +606,163 @@ function returnBullet(b) {
   b.pos = vec2(-100, -100)
 }
 ```
+
+## Enemy State Machine (with Collision Handling)
+
+Enemies with multiple behaviors need state machines. **Critical:** Handle state transitions on collision to prevent stuck loops.
+
+```javascript
+// state constants
+const ENEMY_STATES = {
+  IDLE: "idle",
+  TELEGRAPH: "telegraph",  // warning before attack
+  CHARGING: "charging",
+  STUNNED: "stunned",
+  RETURNING: "returning",
+}
+
+function spawnRusher(x, y) {
+  const CHARGE_SPEED = 450
+  const STUN_TIME = 0.8
+  const TELEGRAPH_TIME = 0.5
+
+  const rusher = add([
+    sprite("rusher"),
+    pos(x, y),
+    area(),
+    anchor("center"),
+    "enemy",
+    "rusher",
+    {
+      state: ENEMY_STATES.IDLE,
+      stateTimer: 0,
+      originalX: x,
+      target: null,
+    },
+  ])
+
+  rusher.onUpdate(() => {
+    rusher.stateTimer -= dt()
+
+    switch (rusher.state) {
+      case ENEMY_STATES.IDLE:
+        // detect player, start telegraph
+        const player = get("player")[0]
+        if (player && rusher.pos.dist(player.pos) < 200) {
+          rusher.state = ENEMY_STATES.TELEGRAPH
+          rusher.stateTimer = TELEGRAPH_TIME
+          rusher.target = player.pos.clone()
+          // visual warning (flash, shake, etc.)
+        }
+        break
+
+      case ENEMY_STATES.TELEGRAPH:
+        // warning animation
+        if (rusher.stateTimer <= 0) {
+          rusher.state = ENEMY_STATES.CHARGING
+          rusher.originalX = rusher.pos.x
+        }
+        break
+
+      case ENEMY_STATES.CHARGING:
+        // move toward target
+        const dir = rusher.target.sub(rusher.pos).unit()
+        rusher.move(dir.scale(CHARGE_SPEED))
+
+        // stop after traveling far enough or timeout
+        if (rusher.pos.dist(rusher.originalX) > 300) {
+          rusher.state = ENEMY_STATES.STUNNED
+          rusher.stateTimer = STUN_TIME
+        }
+        break
+
+      case ENEMY_STATES.STUNNED:
+        // vulnerable, can't move
+        if (rusher.stateTimer <= 0) {
+          rusher.state = ENEMY_STATES.RETURNING
+        }
+        break
+
+      case ENEMY_STATES.RETURNING:
+        // go back to patrol position
+        rusher.moveTo(rusher.originalX, rusher.pos.y, 100)
+        if (Math.abs(rusher.pos.x - rusher.originalX) < 5) {
+          rusher.state = ENEMY_STATES.IDLE
+        }
+        break
+    }
+  })
+
+  // CRITICAL: handle collision to prevent stuck loops
+  // when enemy hits player during charge, force state change
+  rusher.onCollide("player", () => {
+    if (rusher.state === ENEMY_STATES.CHARGING) {
+      rusher.state = ENEMY_STATES.STUNNED
+      rusher.stateTimer = STUN_TIME
+    }
+  })
+
+  return rusher
+}
+```
+
+**Key points:**
+- Always transition to safe state on collision (stunned, returning)
+- Use timers for state duration
+- Store original position for return behavior
+- Telegraph attacks to give player reaction time
+
+## Scene Data Passing
+
+Pass multiple values between scenes using objects instead of multiple parameters.
+
+```javascript
+// ❌ BAD - only first parameter works reliably
+scene("gameover", (score, depth, kills) => {
+  // depth and kills may be undefined
+})
+go("gameover", score, depth, kills)
+
+// ✅ GOOD - pass single object with all data
+scene("gameover", (data) => {
+  const { score, depth, kills } = data
+
+  add([
+    text(`Score: ${score}`, { size: 32 }),
+    pos(center().x, 200),
+    anchor("center"),
+  ])
+
+  add([
+    text(`Depth: ${depth}`, { size: 24 }),
+    pos(center().x, 260),
+    anchor("center"),
+  ])
+
+  add([
+    text(`Kills: ${kills}`, { size: 24 }),
+    pos(center().x, 300),
+    anchor("center"),
+  ])
+})
+
+// call with object
+go("gameover", { score: 1250, depth: 7, kills: 23 })
+```
+
+**Also works for restart with initial state:**
+```javascript
+scene("game", (options = {}) => {
+  const { startLevel = 1, savedScore = 0 } = options
+
+  let level = startLevel
+  let score = savedScore
+  // ...
+})
+
+// fresh start
+go("game")
+
+// continue from checkpoint
+go("game", { startLevel: 3, savedScore: 500 })
+```

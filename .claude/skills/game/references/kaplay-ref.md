@@ -571,3 +571,39 @@ add([circle(5), opacity(1), lifespan(0.5, {fade: 0.3})])  // ✅ fades out
 add([sprite("enemy"), body()])  // ❌ no collision
 add([sprite("enemy"), area(), body()])  // ✅ has collision
 ```
+
+### Styled Text Brackets
+Brackets in text() trigger styled text parser and crash:
+```javascript
+// ❌ BAD - crashes with styled text parser error
+text("[1] Select option")
+
+// ✅ GOOD
+text("Press 1 to select")
+```
+
+### Negative String Repeat
+String.repeat() crashes with negative values:
+```javascript
+// ❌ BAD - crashes if health goes below 0
+"♥".repeat(health)
+
+// ✅ GOOD
+"♥".repeat(Math.max(0, health))
+```
+
+### onUpdate Overwrites Tweens
+Animations in onUpdate() overwrite tween values:
+```javascript
+// ❌ BAD - shimmer overwrites fade tween, fade never completes
+onUpdate(() => {
+  if (waveActive) {
+    point.opacity = 0.5 + Math.sin(time()) * 0.3
+  }
+})
+tween(point.opacity, 0, 0.5, (v) => point.opacity = v)
+
+// ✅ GOOD - stop animation before fading
+waveActive = false
+tween(point.opacity, 0, 0.5, (v) => point.opacity = v)
+```
