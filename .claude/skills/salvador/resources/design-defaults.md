@@ -6,9 +6,9 @@
 
 ```
 BASE_W = 850, BASE_H = 540
-body text:    18px minimum
-headings:     28px minimum
-captions:     14px minimum
+body text:    ~14px+ (comfortable to read)
+headings:     ~22px+ (clearly larger than body)
+captions:     ~11px+ (readable, not squinting)
 card padding: 16px all sides
 element gap:  20px minimum between unrelated elements
 primary area: fill 60%+ of canvas
@@ -40,27 +40,40 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 
 ## Smooth Transition Pattern
 
-set target positions on stage change, interpolate in draw(). never teleport.
+**no fade-cuts.** stages must NOT simply fade out old content and fade in new content.
+elements that appear in consecutive stages must lerp to their new positions.
+new elements can fade in, removed elements can fade out, but shared elements move continuously.
 
 ```js
-// in state management
-let current = { x: 100, y: 200, size: 50 };
-let target  = { x: 100, y: 200, size: 50 };
+// each element that persists across stages has current + target state
+let card = { x: 50, y: 100, w: 300, h: 200, alpha: 1 };
+let cardTarget = { x: 50, y: 100, w: 300, h: 200, alpha: 1 };
+
+let sphere = { x: 500, y: 270, r: 80, alpha: 0 };
+let sphereTarget = { x: 500, y: 270, r: 80, alpha: 0 };
 
 function setStage(n) {
   stage = n;
-  // set targets — current will lerp toward them
-  if (n === 1) { target.x = 100; target.y = 200; target.size = 50; }
-  if (n === 2) { target.x = 400; target.y = 270; target.size = 120; }
-  // ...
+  if (n === 0) {
+    // card is prominent, sphere not yet visible
+    cardTarget = { x: 50, y: 100, w: 300, h: 200, alpha: 1 };
+    sphereTarget = { x: 500, y: 270, r: 80, alpha: 0 };
+  }
+  if (n === 1) {
+    // card shrinks and moves aside, sphere fades in
+    cardTarget = { x: 20, y: 350, w: 250, h: 150, alpha: 1 };
+    sphereTarget = { x: 450, y: 250, r: 120, alpha: 1 };
+  }
 }
 
-// in draw()
+// call this every frame in draw()
 function updateTransitions() {
   const speed = 0.08;
-  current.x    = p.lerp(current.x,    target.x,    speed);
-  current.y    = p.lerp(current.y,    target.y,    speed);
-  current.size = p.lerp(current.size, target.size, speed);
+  for (const [cur, tgt] of [[card, cardTarget], [sphere, sphereTarget]]) {
+    for (const key of Object.keys(tgt)) {
+      cur[key] = p.lerp(cur[key], tgt[key], speed);
+    }
+  }
 }
 ```
 

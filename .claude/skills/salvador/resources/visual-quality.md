@@ -12,10 +12,10 @@
 
 ## Typography
 
-- minimum font sizes at 850×540 base:
-  - body text ≥ 18px
-  - headings ≥ 28px
-  - labels/captions ≥ 14px
+- font size guidelines at 850×540 base (use judgement — legibility is what matters):
+  - body text: ~14px+ (must be comfortable to read)
+  - headings: ~22px+ (must be clearly larger than body)
+  - labels/captions: ~11px+ (must be readable, not squinting)
 - NEVER use forward-slash for fractions (e.g. `1/2`) — always render as stacked fraction:
 
 ```js
@@ -39,11 +39,13 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 
 ## Transitions
 
+- **NO fade-cuts**: stages must NOT simply fade out old content and fade in new content. that's a PowerPoint slide transition, not a visualization.
+- elements that exist in consecutive stages must lerp to their new positions/sizes — the viewer tracks them moving
+- elements that are new in a stage can fade in. elements that are removed can fade out. but shared elements MUST move continuously.
 - mathematically continuous: if stage A ends at position (x,y), stage B MUST start at (x,y)
-- use lerp for smooth interpolation — never teleport elements
 - show the moment of change: don't skip from state A to state B
 - minimum 500ms for meaningful transitions (fast enough to not bore, slow enough to observe)
-- target positions set on stage change, current positions interpolate toward them in draw()
+- use the lerp transition pattern from `design-defaults.md`: set targets on stage change, interpolate in draw()
 
 ## Color
 

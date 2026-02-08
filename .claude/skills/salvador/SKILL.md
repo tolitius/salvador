@@ -104,9 +104,9 @@ Repeat this cycle until the visualization is **High Quality**:
     * *Constraint*: **Keyboard handling**: Use `window.addEventListener('keydown')` for arrow keys (and map 'G' to `saveGif`).
     * *Constraint*: **Track elements visually**: Color-code components that transform and maintain those colors throughout all stages.
     * *Constraint*: **Expose stage count**: Set `window.stageCount = stages.length` so the inspector can navigate all stages.
-    * *Constraint*: **Font sizes**: Use minimums from `resources/design-defaults.md` (18px body, 28px heading, 14px caption).
+    * *Constraint*: **Font sizes**: Use guidelines from `resources/design-defaults.md` (~14px+ body, ~22px+ heading, ~11px+ caption). Legibility is what matters.
     * *Constraint*: **Fractions**: NEVER use forward-slash for math fractions. Use the visual fraction renderer from `resources/design-defaults.md`.
-    * *Constraint*: **Transitions**: Use lerp-based interpolation from `resources/design-defaults.md`. Set targets on stage change, interpolate in draw().
+    * *Constraint*: **Transitions — NO FADE-CUTS**: Stages must NOT simply fade out old content and fade in new. Elements present in consecutive stages must lerp to their new positions/sizes. New elements can fade in, removed elements can fade out, but shared elements move continuously. Use the transition pattern from `resources/design-defaults.md`.
 
 2.  **Inspect**: Run `node inspect.js`
     * The inspector captures ALL stages (navigates via ArrowRight, saves `snapshots/stage_N.png` for each).
@@ -122,11 +122,12 @@ Repeat this cycle until the visualization is **High Quality**:
     - minimum 20px gap between unrelated elements
 
     **Typography check** (every stage):
-    - font sizes ≥ minimums (18px body, 28px heading, 14px caption)
+    - font sizes legible (~14px+ body, ~22px+ heading, ~11px+ caption)
     - no forward-slash fractions — must be stacked
     - consistent font sizes within same view
 
     **Transition check** (compare consecutive stages):
+    - are shared elements lerping to new positions? (no fade-cuts for elements that persist)
     - does stage N+1 start where stage N ends? (no position jumps)
     - are transitions slow enough to observe?
     - is the moment of change visible, or was it skipped?
