@@ -20,7 +20,7 @@ if [ ! -d "node_modules/playwright" ]; then
 fi
 
 # 3. Structure
-mkdir -p src
+mkdir -p src snapshots
 # copy inspector to project root (so node can find node_modules)
 cp "$(dirname "$0")/inspect.js" ./inspect.js
 

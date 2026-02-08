@@ -14,6 +14,8 @@ Follow this **strict loop** when asked to visualize a concept:
 2.  **Scaffold**: Ensure `index.html` and `src/main.js` exist.
 3.  **Read p5.js Reference**: Read `resources/p5-missing-knowledge.md` for p5.js 2.x API changes before writing any code.
 4.  **Read Responsive Design**: Read `resources/responsive-design.md` for the scale factor pattern.
+5.  **Read Visual Quality Rules**: Read `resources/visual-quality.md` for layout, typography, transition, and color rules.
+6.  **Read Design Defaults**: Read `resources/design-defaults.md` for font sizes, spacing values, and code patterns.
 
 ### Phase 1.5: Concept Analysis (Before Coding!)
 
@@ -26,29 +28,33 @@ Before writing any code, decompose the concept:
    - Don't guess scientific/mathematical details
    - Get the real values (e.g., H2O bond angle is 104.5°, not "about 109°")
 
-2. **Break Into Stages**: Most concepts can be shown as a progression:
-   - What is the "before" state?
-   - What are the intermediate transformation steps?
-   - What is the "final" state?
-   - Aim for 3-5 stages that build understanding
+2. **Read Storytelling Guide**: Read `resources/storytelling.md` for narrative structure.
 
-3. **Identify Dynamic Elements**: What moves in this system?
+3. **Plan the Narrative Arc**: Don't just "break into stages" — design a story:
+   - **Setup**: introduce the actors and the world
+   - **Tension**: what's the question or unknown? create curiosity
+   - **Revelation**: the moment of insight (this is where learning happens)
+   - **Understanding**: show the mechanism, the "why"
+   - **Mastery**: let the user interact or explore variations
+   - Ask: "where is the 'aha' moment?" — if you can't answer, redesign the stages
+
+4. **Identify Dynamic Elements**: What moves in this system?
    - Do NOT make a visualization of a static snapshot, everything moves in the Universe
    - Even if the concept has "stages," the actors must be alive (e.g., electrons orbiting, atoms vibrating, lists scanning).
    - be DETAILED. for example if certain electrons will be bonding, find out which ones (e.g., certain valence electrons) and highlight them visually. this of course does not just apply to Chemistry, but to any domain (e.g., in sorting algorithms, show which elements are being compared/swapped at each step)
 
-4. **Identify What Needs Explanation**: What text/labels/diagrams would help?
+5. **Identify What Needs Explanation**: What text/labels/diagrams would help?
    - Key terms to define
    - Quantities to show
    - Relationships to highlight
 
 ### Phase 1.6: Stage Design Principles
 
-5. **Living Systems**: The system must breathe.
+6. **Living Systems**: The system must breathe.
    - **Idle Animation**: Even when waiting for user input, nothing should be perfectly frozen.
    - **Continuous Time**: Use `draw()` to animate physics/logic continuously. `noLoop()` is forbidden.
 
-6. **Granular Transitions**: Never skip the "moment of change"
+7. **Granular Transitions**: Never skip the "moment of change"
    - BAD: "state A" → "state B" (viewer misses the transformation)
    - GOOD: "state A" → "approaching change" → "moment of change" → "state B"
    - Rule: if two stages feel like a big jump, add an intermediate stage
@@ -57,7 +63,7 @@ Before writing any code, decompose the concept:
      * Chemical bond: show atoms approaching before showing them bonded
      * Mathematical proof: show each logical step, not just premise → conclusion
 
-7. **Trackability**: When elements transform or move, viewers must follow them
+8. **Trackability**: When elements transform or move, viewers must follow them
    - Assign distinct colors to individual components at the start
    - Maintain those colors through all stages
    - Link details, configurations, numbers, strings, etc.. visually to their representations
@@ -67,7 +73,7 @@ Before writing any code, decompose the concept:
      * In a state machine: color each state and show transitions with matching colors
      * In molecular bonding: color each atom's electrons to show which ones get shared
 
-8. **Data Cards**: Show the underlying facts, not just the visual
+9. **Data Cards**: Show the underlying facts, not just the visual
    - Include domain notation (formulas, equations, configurations, pseudocode)
    - Display quantities, measurements, and labels using proper terminology
    - Cards can appear/disappear based on stage relevance
@@ -97,21 +103,48 @@ Repeat this cycle until the visualization is **High Quality**:
     * *Constraint*: **Canvas sizing**: Use 850x540 or smaller to fit without scrolling
     * *Constraint*: **Keyboard handling**: Use `window.addEventListener('keydown')` for arrow keys (and map 'G' to `saveGif`).
     * *Constraint*: **Track elements visually**: Color-code components that transform and maintain those colors throughout all stages.
+    * *Constraint*: **Expose stage count**: Set `window.stageCount = stages.length` so the inspector can navigate all stages.
+    * *Constraint*: **Font sizes**: Use minimums from `resources/design-defaults.md` (18px body, 28px heading, 14px caption).
+    * *Constraint*: **Fractions**: NEVER use forward-slash for math fractions. Use the visual fraction renderer from `resources/design-defaults.md`.
+    * *Constraint*: **Transitions**: Use lerp-based interpolation from `resources/design-defaults.md`. Set targets on stage change, interpolate in draw().
+
 2.  **Inspect**: Run `node inspect.js`
-3.  **Critique**:
-    * **Logs**: Are there errors?
-    * **Visual Audit**: Open *all* generated snapshots (e.g., `stage_1.png`, `stage_2.png` ... `final.png`) and strictly evaluate the sequence:
-        * **Completeness**: Do not evaluate just the final frame. Check the evolution. Did the visualization break or glitch in the middle?
-        * **Life Check**: Is it moving/evolving? (Reject if the sequence looks like a static slide).
-        * **Composition**: Is the content centered? Is it cut off in *any* frame?
-        * **Legibility**: Is there text overlap? Is the font size appropriate throughout?
-        * **Aesthetics**: Does it look "engineered" or "designed"? (Aim for designed).
-        * **UX**: Did I implement user controls (e.g., "Press 'R' to reset")?
+    * The inspector captures ALL stages (navigates via ArrowRight, saves `snapshots/stage_N.png` for each).
+    * If `window.stageCount` is not exposed, the inspector falls back to 8 presses — so always expose it.
+
+3.  **Critique**: Open **every** `snapshots/stage_N.png` and check against `resources/visual-quality.md`:
+
+    **Layout check** (every stage):
+    - no overlapping text or elements
+    - nothing outside canvas bounds
+    - elements use available space (not tiny in a corner)
+    - cards have proper padding (16px minimum)
+    - minimum 20px gap between unrelated elements
+
+    **Typography check** (every stage):
+    - font sizes ≥ minimums (18px body, 28px heading, 14px caption)
+    - no forward-slash fractions — must be stacked
+    - consistent font sizes within same view
+
+    **Transition check** (compare consecutive stages):
+    - does stage N+1 start where stage N ends? (no position jumps)
+    - are transitions slow enough to observe?
+    - is the moment of change visible, or was it skipped?
+
+    **Educational quality check**:
+    - does each stage explain WHY, not just WHAT?
+    - are colors consistent across all stages?
+    - are interactive elements visually discoverable?
+    - does the narrative arc build understanding progressively?
+
+    **Verification rule**: if you claim a fix, re-run `node inspect.js` and verify the specific area in the new screenshot before proceeding.
+
 4.  **Decide**:
     * *Errors?* -> Fix code -> **Repeat**.
     * *Static/Boring?* -> **Add Micro-Movement (vibration, orbits)** -> **Repeat**.
     * *Physics/Logic Broken?* (e.g. Gravity creates energy, sorting fails) -> **Fix Simulation Logic** -> **Repeat**.
     * *Missing Educational Context?* -> **Add Labels/Data Cards** -> **Repeat**.
+    * *Layout/Typography/Transition issues found in critique?* -> **Fix the specific issue** -> **Repeat**.
     * *Amazing, Dynamic & Physically Accurate?* -> **Proceed to Phase 3**.
 
 ### Phase 3: Presentation (The "Reveal")
