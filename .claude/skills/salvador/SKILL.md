@@ -108,6 +108,7 @@ Repeat this cycle until the visualization is **High Quality**:
       - **Keyboard handling**: Use `window.addEventListener('keydown')`. Map 'G' to `saveGif`.
       - Support interactions (mouse, click, keyboard)
     * *Staged only*:
+      - **Layout zones**: Define CARD and VIZ regions that don't overlap (see `resources/design-defaults.md`). All stage content stays within VIZ bounds.
       - Build an interactive stepper (← →) through stages
       - Show info panels/cards explaining each stage
       - **Expose stage count**: Set `window.stageCount = stages.length` so the inspector can navigate all stages.
