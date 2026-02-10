@@ -40,13 +40,22 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 
 ## Transitions (staged visualizations only)
 
-- **NO fade-cuts**: stages must NOT simply fade out old content and fade in new content. that's a PowerPoint slide transition, not a visualization.
-- elements that exist in consecutive stages must lerp to their new positions/sizes — the viewer tracks them moving
-- elements that are new in a stage can fade in. elements that are removed can fade out. but shared elements MUST move continuously.
+check the **scene plan** from the bridge chain to know which type applies:
+
+**same canvas** (stages build on one scene):
+- elements that persist must lerp to their new positions/sizes — the viewer tracks them moving
+- new elements fade in, removed elements fade out, but shared elements move continuously
 - mathematically continuous: if stage A ends at position (x,y), stage B MUST start at (x,y)
+- use the lerp transition pattern from `design-defaults.md`
+
+**new scene** (stages show genuinely different content):
+- use the scene-switch pattern from `design-defaults.md` — elements fade/slide in over ~0.5s
+- shared chrome (info card, nav, title) must still lerp — never jump positions between stages
+- never instant-cut: even different scenes need a smooth entry
+
+both:
 - show the moment of change: don't skip from state A to state B
-- minimum 500ms for meaningful transitions (fast enough to not bore, slow enough to observe)
-- use the lerp transition pattern from `design-defaults.md`: set targets on stage change, interpolate in draw()
+- minimum 500ms for meaningful transitions
 
 ## Color
 

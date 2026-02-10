@@ -53,7 +53,7 @@ Before writing any code, decompose the concept:
    - if you can't write a bridge question between two stages, they are disconnected — rethink the order or merge them
    - each bridge question MUST appear visually in the rendered stage (info card text, bottom prompt, or animated text)
    - each analogy MUST appear visually in the rendered stage alongside the real concept
-   - **prefer one scene**: for each pair of stages, ask "can I show stage N+1 by adding/modifying elements on stage N's canvas?" If yes, do that instead of switching to a new screen. See Phase 1.6, principle 9.
+   - after the chain, write a **scene plan**: for each transition (1→2, 2→3, ...) decide `same canvas` or `new scene` and say why. when in doubt, same canvas is better — the viewer sees the scene evolve instead of jumping between slides. this decides which transition pattern from `design-defaults.md` to use.
    - this chain is your contract — the code must implement it
 
 5. **If standalone/hybrid**: Plan the scene and interactions:
@@ -76,13 +76,9 @@ Before writing any code, decompose the concept:
    - **Idle Animation**: Even when waiting for user input, nothing should be perfectly frozen.
    - **Continuous Time**: Use `draw()` to animate physics/logic continuously. `noLoop()` is forbidden.
 
-9. **(Staged only) One Scene, Progressive Enhancement**: Prefer building on ONE canvas over switching to different screens.
-   - Ask for each stage: "can I show this by adding/modifying elements on the current canvas?"
-   - YES → add elements, show labels, open edit boxes, extend the diagram. the viewer sees the scene grow.
-   - NO (genuinely different physical system) → new scene is OK, but look harder — often zooming in/out or rearranging the same elements works.
-   - Example: trigonometry — one canvas that progressively adds angle → ratio → unit circle → editable inputs. NOT 5 separate screens.
-   - Example: sorting — one canvas, the array transforms in place. NOT "before" on one screen and "after" on another.
-   - When stages DO share a scene, the transition rules (lerp positions, no fade-cuts) apply naturally — elements slide to new spots.
+9. **(Staged only) Scene Transitions**: Use the scene plan from step 4.
+   - **Same canvas**: add/modify elements in place. Use the lerp transition pattern from `design-defaults.md`. (e.g., trigonometry builds up one diagram; sorting transforms the array in place.)
+   - **New scene**: use the scene-switch pattern from `design-defaults.md` — shared chrome (info card, nav) lerps, scene content fades in smoothly. Never instant-cut.
 
 10. **(Staged only) Granular Transitions**: Never skip the "moment of change"
     - BAD: "state A" → "state B" (viewer misses the transformation)

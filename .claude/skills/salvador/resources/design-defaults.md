@@ -78,6 +78,33 @@ function updateTransitions() {
 }
 ```
 
+## Scene Switch Pattern (when stages use different scenes)
+
+when consecutive stages show genuinely different content, use a timed entry so the switch isn't jarring.
+
+```js
+// track time since last stage change
+let stageT = 0;
+
+function setStage(n) {
+  stage = n;
+  stageT = 0;
+}
+
+// in draw(), advance stageT
+stageT += p.deltaTime / 1000;
+
+// each stage's draw function uses stageT for entry animation:
+// elements appear during the first ~0.5s
+const entry = Math.min(1, stageT / 0.5);
+// fade in
+p.fill(r, g, b, entry * 255);
+// or slide up
+const y = p.lerp(startY + 20, startY, entry);
+```
+
+shared chrome (info card, nav dots, title) should still use the lerp transition pattern above — these persist across all stages and should never jump positions.
+
 ## Card / Panel Pattern
 
 rounded rect with proper padding, optional accent strip.
