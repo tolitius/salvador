@@ -53,6 +53,7 @@ Before writing any code, decompose the concept:
    - if you can't write a bridge question between two stages, they are disconnected — rethink the order or merge them
    - each bridge question MUST appear visually in the rendered stage (info card text, bottom prompt, or animated text)
    - each analogy MUST appear visually in the rendered stage alongside the real concept
+   - **prefer one scene**: for each pair of stages, ask "can I show stage N+1 by adding/modifying elements on stage N's canvas?" If yes, do that instead of switching to a new screen. See Phase 1.6, principle 9.
    - this chain is your contract — the code must implement it
 
 5. **If standalone/hybrid**: Plan the scene and interactions:
@@ -75,17 +76,25 @@ Before writing any code, decompose the concept:
    - **Idle Animation**: Even when waiting for user input, nothing should be perfectly frozen.
    - **Continuous Time**: Use `draw()` to animate physics/logic continuously. `noLoop()` is forbidden.
 
-9. **(Staged only) Granular Transitions**: Never skip the "moment of change"
-   - BAD: "state A" → "state B" (viewer misses the transformation)
-   - GOOD: "state A" → "approaching change" → "moment of change" → "state B"
-   - Rule: if two stages feel like a big jump, add an intermediate stage
+9. **(Staged only) One Scene, Progressive Enhancement**: Prefer building on ONE canvas over switching to different screens.
+   - Ask for each stage: "can I show this by adding/modifying elements on the current canvas?"
+   - YES → add elements, show labels, open edit boxes, extend the diagram. the viewer sees the scene grow.
+   - NO (genuinely different physical system) → new scene is OK, but look harder — often zooming in/out or rearranging the same elements works.
+   - Example: trigonometry — one canvas that progressively adds angle → ratio → unit circle → editable inputs. NOT 5 separate screens.
+   - Example: sorting — one canvas, the array transforms in place. NOT "before" on one screen and "after" on another.
+   - When stages DO share a scene, the transition rules (lerp positions, no fade-cuts) apply naturally — elements slide to new spots.
 
-10. **Trackability**: When elements transform or move, viewers must follow them
+10. **(Staged only) Granular Transitions**: Never skip the "moment of change"
+    - BAD: "state A" → "state B" (viewer misses the transformation)
+    - GOOD: "state A" → "approaching change" → "moment of change" → "state B"
+    - Rule: if two stages feel like a big jump, add an intermediate stage
+
+11. **Trackability**: When elements transform or move, viewers must follow them
     - Assign distinct colors to individual components at the start
     - Maintain those colors throughout the visualization
     - Make it obvious which element went where, became what, or combined with whom
 
-11. **(Educational) Data Cards**: Show the underlying facts, not just the visual
+12. **(Educational) Data Cards**: Show the underlying facts, not just the visual
     - Include domain notation (formulas, equations, configurations, pseudocode)
     - Display quantities, measurements, and labels using proper terminology
 
