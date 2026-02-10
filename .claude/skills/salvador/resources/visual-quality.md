@@ -4,18 +4,19 @@
 
 ## Layout
 
-- elements must not overlap — verify by eye in every stage screenshot
-- nothing outside canvas bounds (check ALL stages, not just the first)
+- elements must not overlap — verify by eye in every snapshot
+- nothing outside canvas bounds (check ALL snapshots, not just the first)
 - primary elements should fill 60%+ of available space — don't waste screen real estate
 - cards/panels: minimum 16px padding all sides, text must not touch edges
 - leave 20px minimum gap between unrelated elements
 
 ## Typography
 
-- font size guidelines at 850×540 base (use judgement — legibility is what matters):
-  - body text: ~14px+ (must be comfortable to read)
-  - headings: ~22px+ (must be clearly larger than body)
-  - labels/captions: ~11px+ (must be readable, not squinting)
+- font size is about **hierarchy**, not minimums. match size to importance:
+  - primary content (text the viewer must read to understand the concept): prominent, easy to read
+  - headings / titles: clearly larger than body text
+  - secondary info (labels, annotations, axis marks, metadata): can be smaller — as small as needed for the design
+  - the test: if the viewer has to squint to read something they need for understanding, it's too small. if it's supporting detail, small is fine.
 - NEVER use forward-slash for fractions (e.g. `1/2`) — always render as stacked fraction:
 
 ```js
@@ -37,7 +38,7 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 - use Georgia or serif fonts for mathematical content
 - ensure high contrast: light text on dark backgrounds, dark text on light backgrounds
 
-## Transitions
+## Transitions (staged visualizations only)
 
 - **NO fade-cuts**: stages must NOT simply fade out old content and fade in new content. that's a PowerPoint slide transition, not a visualization.
 - elements that exist in consecutive stages must lerp to their new positions/sizes — the viewer tracks them moving
@@ -50,7 +51,7 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 ## Color
 
 - color-code elements when they're first introduced
-- maintain those colors through ALL stages — never silently reassign colors
+- maintain those colors throughout — never silently reassign colors
 - when text references a visual element, use the matching color for that text
 - never all black-and-white — use the modern palette (from SKILL.md constraints)
 - ensure text-on-background has sufficient contrast
@@ -62,10 +63,10 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 - control hints (e.g. "← → to navigate") must be visible but subtle
 - navigation: always call `e.preventDefault()` on arrow keys to disable default scroll
 
-## Educational Content
+## Educational Content (for educational visualizations)
 
 - explain the WHY at every step, not just the WHAT
 - don't show answers before the learning moment — build understanding first
-- progressive revelation: each stage builds on the previous
-- keep info card content relevant to the current stage — don't reuse text across stages
+- if staged: progressive revelation, each stage builds on the previous
+- keep info card content relevant to what's currently shown
 - use color-coded annotations connecting cause to effect

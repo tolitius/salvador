@@ -6,9 +6,10 @@
 
 ```
 BASE_W = 850, BASE_H = 540
-body text:    ~14px+ (comfortable to read)
-headings:     ~22px+ (clearly larger than body)
-captions:     ~11px+ (readable, not squinting)
+font hierarchy: size reflects importance
+  primary text:  prominent, easy to read (the content needed to understand the concept)
+  headings:      clearly larger than body
+  secondary:     smaller is fine for labels, annotations, metadata
 card padding: 16px all sides
 element gap:  20px minimum between unrelated elements
 primary area: fill 60%+ of canvas
@@ -38,7 +39,7 @@ function drawFraction(p, numerator, denominator, x, y, size) {
 }
 ```
 
-## Smooth Transition Pattern
+## Smooth Transition Pattern (staged visualizations only)
 
 **no fade-cuts.** stages must NOT simply fade out old content and fade in new content.
 elements that appear in consecutive stages must lerp to their new positions.
@@ -102,7 +103,7 @@ function drawCard(p, x, y, w, h, accentColor) {
 }
 ```
 
-## Stage Navigation Boilerplate
+## Stage Navigation Boilerplate (staged visualizations only)
 
 standard arrow key handler. includes `window.stageCount` for the inspector.
 
