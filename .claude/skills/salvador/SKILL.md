@@ -69,6 +69,7 @@ Before writing any code, decompose the concept:
    - Key terms to define
    - Quantities to show
    - Relationships to highlight
+   - **For each step, ask: what does the viewer NOT know yet?** Don't skip steps that seem obvious — the viewer is learning, not reviewing.
 
 ### Phase 1.6: Design Principles
 
@@ -101,6 +102,7 @@ Repeat this cycle until the visualization is **High Quality**:
     * *Always*:
       - Use a modern color palette (avoid default pure RGB)
       - **Continuous Motion**: `draw()` runs continuously. Show micro-movements even in idle states.
+      - **Animation speed**: text that appears during animation must stay visible for at least 3 seconds. Transformations must be slow enough to follow — when in doubt, double the duration.
       - Ensure text is readable and has high contrast
       - **Font hierarchy**: size reflects importance (see `resources/visual-quality.md`)
       - **Fractions**: NEVER use forward-slash for math fractions. Use the visual fraction renderer from `resources/design-defaults.md`.
