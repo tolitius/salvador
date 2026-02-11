@@ -105,28 +105,21 @@ const y = p.lerp(startY + 20, startY, entry);
 
 shared chrome (info card, nav dots, title) should still use the lerp transition pattern above — these persist across all stages and should never jump positions.
 
-## Card / Panel Pattern
+## Card / Panel (for annotations, not explanations)
 
-rounded rect with proper padding, optional accent strip.
+use sparingly — for small data callouts, key facts, or detail annotations. NOT for paragraphs of explanation (that's the "text-first" anti-pattern).
 
 ```js
 function drawCard(p, x, y, w, h, accentColor) {
-  const pad = 16;
-  // shadow
   p.noStroke();
   p.fill(0, 40);
   p.rect(x + 3, y + 3, w, h, 10);
-  // card body
   p.fill(30, 35, 50);
   p.rect(x, y, w, h, 10);
-  // accent strip on left
   if (accentColor) {
     p.fill(accentColor);
     p.rect(x, y, 4, h, 10, 0, 0, 10);
   }
-  // text area starts at (x + pad, y + pad)
-  // available width: w - 2 * pad
-  return { textX: x + pad, textY: y + pad, textW: w - 2 * pad };
 }
 ```
 

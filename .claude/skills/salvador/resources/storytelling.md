@@ -68,6 +68,7 @@ examples:
 - **"PowerPoint"**: corporate boxes, tiny fonts, bullet point lists. this is not a presentation.
 - **"answer first"**: showing the result before building understanding. kills curiosity.
 - **"decoration movement"**: wobble/float that teaches nothing. motion must have meaning.
+- **"text-first"**: paragraphs of explanation with decorative visuals beside them. the visual should carry the meaning — a pile splitting into mole-sized chunks teaches more than a paragraph about molar mass. text annotates, it doesn't explain.
 - **"info dump"**: cramming every fact onto one screen. progressive revelation beats density.
 - **"museum mode"**: 6 accurate exhibits, each well-researched, but with no thread connecting them. the viewer learns isolated facts but can't see why A leads to B. fix: bridge questions between every pair of stages.
 

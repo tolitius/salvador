@@ -6,6 +6,8 @@ description: Autonomous p5.js visualization agent. It implements, inspects, crit
 # Salvador Agent
 Use this skill to visualize concepts using p5.js with a focus on **high-quality UX, aesthetics, and continuous motion**.
 
+**The visual IS the explanation.** Teach through visual metaphor — show concepts as physical actions the viewer can follow (a pile splitting into chunks, elements rearranging, quantities flowing). Text is annotation, not content. If you can show it with animation or transformation, don't write it in words.
+
 ## Workflow
 Follow this **strict loop** when asked to visualize a concept:
 
