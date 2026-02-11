@@ -47,24 +47,35 @@ import { mkdirSync } from 'fs';
       return null;
     });
 
-    const totalStages = stageCount || 8; // fallback: capture up to 8
+    const captured = [];
 
-    // 7. capture stage 1 (initial state)
-    await page.screenshot({ path: 'snapshots/stage_1.png' });
-    const captured = ['snapshots/stage_1.png'];
-
-    // 8. navigate remaining stages via ArrowRight
-    for (let i = 2; i <= totalStages; i++) {
-      await page.keyboard.press('ArrowRight');
-      await page.waitForTimeout(800); // let transitions settle
-      const path = `snapshots/stage_${i}.png`;
-      await page.screenshot({ path });
-      captured.push(path);
+    if (!stageCount || stageCount === 1) {
+      // standalone / single-stage: capture 3 frames at different moments
+      // so the agent can see animation at different phases
+      await page.screenshot({ path: 'snapshots/frame_1.png' });
+      captured.push('snapshots/frame_1.png');
+      await page.waitForTimeout(3500); // t ≈ 5s
+      await page.screenshot({ path: 'snapshots/frame_2.png' });
+      captured.push('snapshots/frame_2.png');
+      await page.waitForTimeout(5000); // t ≈ 10s
+      await page.screenshot({ path: 'snapshots/frame_3.png' });
+      captured.push('snapshots/frame_3.png');
+    } else {
+      // staged: capture each stage
+      await page.screenshot({ path: 'snapshots/stage_1.png' });
+      captured.push('snapshots/stage_1.png');
+      for (let i = 2; i <= stageCount; i++) {
+        await page.keyboard.press('ArrowRight');
+        await page.waitForTimeout(800); // let transitions settle
+        const path = `snapshots/stage_${i}.png`;
+        await page.screenshot({ path });
+        captured.push(path);
+      }
     }
 
-    // 9. report
-    console.log(`\n>> [Inspector] Captured ${captured.length} stage(s) from ${url}`);
-    console.log(`>> [Inspector] Stage count detected: ${stageCount ?? 'none (used fallback)'}`);
+    // 7. report
+    console.log(`\n>> [Inspector] Captured ${captured.length} snapshot(s) from ${url}`);
+    console.log(`>> [Inspector] Stage count: ${stageCount ?? 'standalone (3 frames at t=1.5s, 5s, 10s)'}`);
     captured.forEach(p => console.log(`   - ${p}`));
     if (errors.length > 0) {
       console.log(`>> [Inspector] ${errors.length} error(s) found`);

@@ -121,39 +121,18 @@ Repeat this cycle until the visualization is **High Quality**:
 
 2.  **Inspect**: Run `node inspect.js`
     * For staged: the inspector captures ALL stages (navigates via ArrowRight, saves `snapshots/stage_N.png` for each).
-    * For standalone: the inspector captures a single `snapshots/stage_1.png`. If the visualization has no stages, `window.stageCount` is not needed.
+    * For standalone: the inspector captures 3 frames at different animation moments (`snapshots/frame_1.png`, `frame_2.png`, `frame_3.png`). If the visualization has no stages, `window.stageCount` is not needed.
 
-3.  **Critique**: Open **every** snapshot and check against `resources/visual-quality.md`:
+3.  **Critique**: Open **every** snapshot. Your job is to **find problems** — list at least 3 per screenshot. If you can't find 3, look harder — there are always problems in a first draft.
 
-    **Layout check** (all types):
-    - no overlapping text or elements
-    - nothing outside canvas bounds
-    - elements use available space (not tiny in a corner)
-    - cards have proper padding (16px minimum)
+    For each snapshot, do these two things in order:
 
-    **Typography check** (all types):
-    - font hierarchy: primary content prominent, headings larger than body, secondary info can be small
-    - no forward-slash fractions — must be stacked
-    - consistent font sizes within same view
+    **First — describe what you see**: What would a first-time viewer understand from this screenshot alone? What's clear? What's confusing? What's broken? (overlaps, clipping, misalignment, text collisions, elements outside bounds, unclear processes or connections)
 
-    **Transition check** (staged only — compare consecutive stages):
-    - are shared elements lerping to new positions? (no fade-cuts for elements that persist)
-    - does stage N+1 start where stage N ends? (no position jumps)
-    - are transitions slow enough to observe?
-
-    **Narrative check** (staged only):
-    - does each stage end with a visible bridge question that the next stage answers? (no "museum mode")
-    - can a newcomer follow why stage N leads to stage N+1?
-    - is there at least one analogy grounding the abstract concept in something familiar?
-
-    **Aesthetics & motion check** (all types):
-    - does it look designed, not engineered?
-    - is something always alive / moving? (reject if it looks like a static image)
-    - are interactive elements visually discoverable?
-    - are colors consistent throughout?
-
-    **Educational quality check** (if educational):
-    - does each stage/view explain WHY, not just WHAT?
+    **Then — check specifics** (use `resources/visual-quality.md` as reference):
+    - overlaps, clipping, out-of-bounds, misalignment
+    - (staged only) transitions between consecutive stages: do shared elements lerp? bridge questions visible?
+    - (standalone) compare frames: does animation show meaningful change? is anything too fast to read?
 
     **Verification rule**: if you claim a fix, re-run `node inspect.js` and verify the specific area in the new screenshot before proceeding.
 
