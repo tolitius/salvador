@@ -58,6 +58,7 @@ Before writing any code, decompose the concept:
    Example — BAD: "aluminum cooled to 15 mK, electrons form Cooper pairs, zero resistance"
    Example — GOOD: "12 electrons bounce off lattice nodes → temperature gauge drops → electrons slow, pair up with glowing bonds, glide smoothly through lattice"
    Rules:
+   - for each stage, find the **visual contrast that teaches**: what changes, and what does the change MEAN? (chaotic→ordered = resistance→superconductivity, bouncing→gliding = unpaired→paired). The transformation IS the explanation — if the viewer watches the animation without reading anything, they should still get it.
    - if you can't write a bridge question between two stages, they are disconnected — rethink the order or merge them
    - each bridge question MUST appear visually in the rendered stage (info card text, bottom prompt, or animated text)
    - each analogy MUST appear visually in the rendered stage alongside the real concept
@@ -108,6 +109,7 @@ Repeat this cycle until the visualization is **High Quality**:
       - Use a modern color palette (avoid default pure RGB)
       - **Continuous Motion**: `draw()` runs continuously. Show micro-movements even in idle states.
       - **Animation speed**: text that appears during animation must stay visible for at least 3 seconds. Transformations must be slow enough to follow — when in doubt, double the duration.
+      - **Text budget per stage**: 1 title (3-5 words), up to 4 labels (1-3 words each), 1 bridge question, optionally 1 equation. More text than this = text-first anti-pattern.
       - Ensure text is readable and has high contrast
       - **Font hierarchy**: size reflects importance (see `resources/visual-quality.md`)
       - **Fractions**: NEVER use forward-slash for math fractions. Use the visual fraction renderer from `resources/design-defaults.md`.
@@ -129,6 +131,8 @@ Repeat this cycle until the visualization is **High Quality**:
     * For standalone: the inspector captures 3 frames at different animation moments (`snapshots/frame_1.png`, `frame_2.png`, `frame_3.png`). If the visualization has no stages, `window.stageCount` is not needed.
 
 3.  **Critique**: Open **every** snapshot. Your job is to **find problems** — list at least 3 per screenshot. If you can't find 3, look harder — there are always problems in a first draft.
+
+    **Before checking details, ask**: would a viewer understand this concept if they couldn't read any text? If not, the visuals aren't carrying enough weight — rethink the approach, don't polish details.
 
     For each snapshot, do these two things in order:
 
