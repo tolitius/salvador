@@ -15,23 +15,6 @@ element gap:  20px minimum between unrelated elements
 primary area: fill 60%+ of canvas
 ```
 
-## Layout Zones (staged visualizations with info card)
-
-define non-overlapping zones before placing any content. all stage content stays within VIZ.
-
-```js
-// card on the left, visualization on the right — they never share space
-const CARD = { x: 16, y: 60, w: 260, h: 420 };
-const VIZ  = { x: CARD.x + CARD.w + 20, y: 40, w: BASE_W - CARD.x - CARD.w - 36, h: BASE_H - 80 };
-
-// constrain all stage elements to VIZ bounds
-// example: place a circle in the viz region
-const cx = VIZ.x + VIZ.w / 2;
-const cy = VIZ.y + VIZ.h / 2;
-```
-
-adapt the split to your content (card can be narrower/shorter, viz can be wider), but the rule is: **card zone and viz zone must not overlap**. stage content never leaks into the card zone.
-
 ## Visual Fraction Renderer
 
 use this whenever math fractions appear — never render fractions with a forward slash.
