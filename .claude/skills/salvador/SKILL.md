@@ -43,25 +43,41 @@ Before writing any code, decompose the concept:
 
 4. **If staged — STOP — Write the Bridge Chain** (do NOT proceed to coding without it):
 
-   Write out this exact structure for every stage — describe **what the viewer SEES happening on screen** (animations, transformations, movement), not what the concept IS:
+   Write out this exact structure for every stage:
    ```
-   stage 1: [what the viewer SEES — describe the animation/visual action, not the concept]
-     motion: [what moves, how, and why — be specific about animations]
+   stage 1: [title]
+     BEFORE: [what the viewer sees at the START of this stage]
+     AFTER:  [what the viewer sees at the END — what changed and why]
+     teaches: [what this visual change communicates to the viewer]
      analogy: [everyday thing that works like this]
      → "[question that creates pull to stage 2]"
-   stage 2: [what the viewer SEES — answers the question above]
-     motion: [what moves, how, and why]
+   stage 2: [title]
+     BEFORE: [starting visual state — must answer the bridge from stage 1]
+     AFTER:  [ending visual state — what transformed]
+     teaches: [what the contrast communicates]
      analogy: [...]
      → "[question that creates pull to stage 3]"
    stage 3: ...
    ```
-   Example — BAD: "aluminum cooled to 15 mK, electrons form Cooper pairs, zero resistance"
-   Example — GOOD: "12 electrons bounce off lattice nodes → temperature gauge drops → electrons slow, pair up with glowing bonds, glide smoothly through lattice"
+   Example — BAD:
+   ```
+   stage 2: Cooper Pairs
+     BEFORE: lattice with electrons
+     AFTER:  lattice with paired electrons
+     teaches: Cooper pairs have zero resistance
+   ```
+   Example — GOOD:
+   ```
+   stage 2: Cooper Pairs
+     BEFORE: 12 electrons bouncing chaotically off lattice nodes, leaving short jittery trails
+     AFTER:  temperature gauge drops, electrons slow, snap into pairs with glowing bonds, glide smoothly through lattice without deflecting
+     teaches: the CONTRAST between chaotic-bouncing and smooth-gliding IS the explanation of superconductivity — no text needed
+   ```
    Rules:
-   - for each stage, find the **visual contrast that teaches**: what changes, and what does the change MEAN? (chaotic→ordered = resistance→superconductivity, bouncing→gliding = unpaired→paired). The transformation IS the explanation — if the viewer watches the animation without reading anything, they should still get it.
+   - every stage MUST have a visible transformation (BEFORE ≠ AFTER). if a stage has no change, it's a static exhibit — merge it or rethink it.
    - if you can't write a bridge question between two stages, they are disconnected — rethink the order or merge them
-   - each bridge question MUST appear visually in the rendered stage (info card text, bottom prompt, or animated text)
-   - each analogy MUST appear visually in the rendered stage alongside the real concept
+   - each bridge question MUST appear visually in the rendered stage
+   - each analogy MUST appear visually in the rendered stage alongside the real concept — not as text in a card
    - after the chain, write a **scene plan**: for each transition (1→2, 2→3, ...) decide `same canvas` or `new scene` and say why. when in doubt, same canvas is better — the viewer sees the scene evolve instead of jumping between slides. this decides which transition pattern from `design-defaults.md` to use.
    - this chain is your contract — the code must implement it
 
