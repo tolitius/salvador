@@ -43,14 +43,20 @@ Before writing any code, decompose the concept:
 
 4. **If staged — STOP — Write the Bridge Chain** (do NOT proceed to coding without it):
 
-   Write out this exact structure for every stage:
+   Write out this exact structure for every stage — describe **what the viewer SEES happening on screen** (animations, transformations, movement), not what the concept IS:
    ```
-   stage 1: [what it shows] | analogy: [everyday thing that works like this]
+   stage 1: [what the viewer SEES — describe the animation/visual action, not the concept]
+     motion: [what moves, how, and why — be specific about animations]
+     analogy: [everyday thing that works like this]
      → "[question that creates pull to stage 2]"
-   stage 2: [what it shows — answers the question above] | analogy: [...]
+   stage 2: [what the viewer SEES — answers the question above]
+     motion: [what moves, how, and why]
+     analogy: [...]
      → "[question that creates pull to stage 3]"
    stage 3: ...
    ```
+   Example — BAD: "aluminum cooled to 15 mK, electrons form Cooper pairs, zero resistance"
+   Example — GOOD: "12 electrons bounce off lattice nodes → temperature gauge drops → electrons slow, pair up with glowing bonds, glide smoothly through lattice"
    Rules:
    - if you can't write a bridge question between two stages, they are disconnected — rethink the order or merge them
    - each bridge question MUST appear visually in the rendered stage (info card text, bottom prompt, or animated text)
@@ -62,12 +68,9 @@ Before writing any code, decompose the concept:
    - what is the visual core? (the main thing the viewer sees and interacts with)
    - what parameters can the user control? (sliders, mouse, click, keyboard)
    - what makes it alive? (physics, particles, procedural generation, response to input)
+   - what moves, how, and why? Do NOT make a static snapshot — everything moves in the Universe.
 
-6. **Identify Dynamic Elements**: What moves in this system?
-   - Do NOT make a static snapshot — everything moves in the Universe
-   - be DETAILED: which specific elements animate, how, and why
-
-7. **Identify What Needs Explanation** (if educational):
+6. **Identify What Needs Explanation** (if educational):
    - Key terms to define
    - Quantities to show
    - Relationships to highlight
@@ -75,25 +78,25 @@ Before writing any code, decompose the concept:
 
 ### Phase 1.6: Design Principles
 
-8. **Living Systems**: The system must breathe.
+7. **Living Systems**: The system must breathe.
    - **Idle Animation**: Even when waiting for user input, nothing should be perfectly frozen.
    - **Continuous Time**: Use `draw()` to animate physics/logic continuously. `noLoop()` is forbidden.
 
-9. **(Staged only) Scene Transitions**: Use the scene plan from step 4.
+8. **(Staged only) Scene Transitions**: Use the scene plan from step 4.
    - **Same canvas**: add/modify elements in place. Use the lerp transition pattern from `design-defaults.md`. (e.g., trigonometry builds up one diagram; sorting transforms the array in place.)
    - **New scene**: use the scene-switch pattern from `design-defaults.md` — shared chrome (info card, nav) lerps, scene content fades in smoothly. Never instant-cut.
 
-10. **(Staged only) Granular Transitions**: Never skip the "moment of change"
+9. **(Staged only) Granular Transitions**: Never skip the "moment of change"
     - BAD: "state A" → "state B" (viewer misses the transformation)
     - GOOD: "state A" → "approaching change" → "moment of change" → "state B"
     - Rule: if two stages feel like a big jump, add an intermediate stage
 
-11. **Trackability**: When elements transform or move, viewers must follow them
+10. **Trackability**: When elements transform or move, viewers must follow them
     - Assign distinct colors to individual components at the start
     - Maintain those colors throughout the visualization
     - Make it obvious which element went where, became what, or combined with whom
 
-12. **(Educational) Data Cards**: Show the underlying facts, not just the visual
+11. **(Educational) Data Cards**: Show the underlying facts, not just the visual
     - Include domain notation (formulas, equations, configurations, pseudocode)
     - Display quantities, measurements, and labels using proper terminology
 
